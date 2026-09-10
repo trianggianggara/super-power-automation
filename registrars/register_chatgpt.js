@@ -25,6 +25,7 @@ const { sleep, rand, fillHuman, gotoWithRetry, handleCookies } = require('../uti
 const { randomFirstName, randomLastName } = require('../utils/names.js');
 const { loadOutlookAccounts, pickFreshOutlook, parseCsvLine } = require('../utils/email.js');
 const outlookApi = require('../utils/outlook.js');
+const TempMail = require('../services/tempmail/tempmail.js');
 
 const CONFIG = {
   chatgptUrl: 'https://chatgpt.com/',
@@ -110,59 +111,150 @@ async function monitorTurnstile(page, timeoutMs = 45000) {
 
 // Extract verification link or code from email body/subject
 function extractOpenAiVerification(subject = '', body = '', preview = '') {
+  // 1. Try TempMail smart extractor first
+  let otp = null;
+  try {
+    const smartOtp = TempMail.extractOtp(subject, body, preview);
+    if (smartOtp && /^\d{6}$/.test(smartOtp)) {
+      otp = smartOtp;
+    }
+  } catch (_) {}
+
+  // 2. Fallback to OpenAI specific regex
+  if (!otp) {
+    const combined = `${subject}\n${preview}\n${body}`;
+    const otpMatch = combined.match(/(?:code|verification|kode|is)\s*(?:is:?|:)?\s*(\d{6})\b/i) || combined.match(/\b(\d{6})\b/);
+    otp = otpMatch ? otpMatch[1] : null;
+  }
+
+  // 3. Try verification link
   const combined = `${subject}\n${preview}\n${body}`;
-
-  // 1. Try OTP code (6 digits)
-  const otpMatch = combined.match(/(?:code|verification|kode|is)\s*(?:is:?|:)?\s*(\d{6})\b/i) || combined.match(/\b(\d{6})\b/);
-  const otp = otpMatch ? otpMatch[1] : null;
-
-  // 2. Try verification link
   const linkMatch = combined.match(/https:\/\/(?:auth0\.openai\.com|auth\.openai\.com|account\.openai\.com)[^\s"'<>]+/i);
   const link = linkMatch ? linkMatch[0] : null;
 
   return { otp, link };
 }
 
-async function waitForOpenAiEmail(email, timeoutMs = 120000, since = Date.now() - 60000) {
-  console.log(`[*] Polling Outlook inbox for OpenAI verification (${email})...`);
+async function waitForOpenAiEmail(email, timeoutMs = 120000, since = Date.now() - 60000, options = {}) {
+  const {
+    page = null,
+    resendAfterMs = 35000,
+    maxResends = 2,
+    mode = 'tempmail',
+    tempmail = null,
+  } = options;
+  console.log(`[*] Polling ${mode} inbox for OpenAI verification (${email})...`);
   const start = Date.now();
+  let lastResendAttempt = Date.now();
+  let resendCount = 0;
 
   while (Date.now() - start < timeoutMs) {
     try {
-      const messages = await outlookApi.getMessages({ email, since, top: 5 });
-      for (const msg of messages) {
-        const subject = msg.subject || '';
-        const preview = msg.bodyPreview || '';
-        const from = msg.from?.emailAddress?.address || '';
+      if (mode === 'outlook') {
+        const messages = await outlookApi.getMessages({ email, since, top: 5 });
+        for (const msg of messages) {
+          const subject = msg.subject || '';
+          const preview = msg.bodyPreview || '';
+          const from = msg.from?.emailAddress?.address || '';
 
-        const isFromOpenAi = from.toLowerCase().includes('openai') || 
-                             subject.toLowerCase().includes('openai') || 
-                             subject.toLowerCase().includes('verify') ||
-                             preview.toLowerCase().includes('openai');
+          const isFromOpenAi = from.toLowerCase().includes('openai') || 
+                               from.toLowerCase().includes('chatgpt') ||
+                               subject.toLowerCase().includes('openai') || 
+                               subject.toLowerCase().includes('verify') ||
+                               preview.toLowerCase().includes('openai');
 
-        if (isFromOpenAi) {
-          console.log(`  [+] Detected email: "${subject}" from ${from}`);
-          const full = await outlookApi.getMessageBody(msg.id, email);
-          const result = extractOpenAiVerification(subject, full.body || preview, preview);
-          if (result.otp || result.link) {
-            return result;
+          if (isFromOpenAi) {
+            console.log(`  [+] Detected email: "${subject}" from ${from}`);
+            const full = await outlookApi.getMessageBody(msg.id, email);
+            const result = extractOpenAiVerification(subject, full.body || preview, preview);
+            if (result.otp || result.link) {
+              return result;
+            }
           }
+        }
+      } else {
+        // TempMail mode (webhook / mailpit / gmail)
+        const tm = tempmail || new TempMail();
+        const messages = await tm.getMessages(email);
+        if (messages && messages.length > 0) {
+          const newMessages = messages.filter(msg => {
+            const recTime = Date.parse(msg.received_at);
+            return isNaN(recTime) || recTime >= since;
+          }).sort((a, b) => (Date.parse(b.received_at) || 0) - (Date.parse(a.received_at) || 0));
+
+          for (const msg of newMessages) {
+            const subject = msg.subject || '';
+            const body = msg.text_body || msg.html_body || '';
+            const preview = msg.html_body || msg.text_body || '';
+            const from = msg.from_address || msg.from || '';
+
+            const isFromOpenAi = from.toLowerCase().includes('openai') || 
+                                 from.toLowerCase().includes('chatgpt') ||
+                                 subject.toLowerCase().includes('openai') || 
+                                 subject.toLowerCase().includes('chatgpt') || 
+                                 subject.toLowerCase().includes('verify') || 
+                                 subject.toLowerCase().includes('code') ||
+                                 body.toLowerCase().includes('openai');
+
+            if (isFromOpenAi || newMessages.length === 1) {
+              console.log(`  [+] Detected email: "${subject}" from ${from}`);
+              const result = extractOpenAiVerification(subject, body, preview);
+              if (result.otp || result.link) {
+                return result;
+              }
+            }
+          }
+        }
+      }
+
+      // If no email received yet, check if we should trigger "Resend email"
+      if (page && !page.isClosed() && resendCount < maxResends && (Date.now() - lastResendAttempt) >= resendAfterMs) {
+        try {
+          const resendBtn = page.locator([
+            'button:has-text("Resend email")',
+            'a:has-text("Resend email")',
+            'button:has-text("Resend code")',
+            'a:has-text("Resend code")',
+            'button:text-is("Resend")',
+            'a:text-is("Resend")'
+          ].join(', ')).first();
+
+          const isVisible = await resendBtn.isVisible({ timeout: 1000 }).catch(() => false);
+          if (isVisible) {
+            const isDisabled = await resendBtn.isDisabled().catch(() => false);
+            const text = (await resendBtn.innerText().catch(() => '')).trim();
+
+            const hasCountdown = text.match(/in \d+|\(\d+s?\)|wait/i);
+            if (!isDisabled && !hasCountdown) {
+              console.log(`  [🔄 RESEND] No OTP email received after ${Math.round((Date.now() - lastResendAttempt) / 1000)}s. Clicking "${text || 'Resend email'}" (${resendCount + 1}/${maxResends})...`);
+              await resendBtn.click().catch(() => {});
+              resendCount++;
+              lastResendAttempt = Date.now();
+              await sleep(2500);
+            } else {
+              console.log(`  [*] Resend button detected but cooling down: "${text}"`);
+            }
+          }
+        } catch (resendErr) {
+          console.log(`  [WARN] Resend button check: ${resendErr.message}`);
         }
       }
     } catch (err) {
       if (
-        err.message.includes('Token refresh failed') ||
-        err.message.includes('invalid_grant') ||
-        err.message.includes('abuse') ||
-        err.message.includes('AADSTS70000') ||
-        err.message.includes('AADSTS50053')
+        mode === 'outlook' && (
+          err.message.includes('Token refresh failed') ||
+          err.message.includes('invalid_grant') ||
+          err.message.includes('abuse') ||
+          err.message.includes('AADSTS70000') ||
+          err.message.includes('AADSTS50053')
+        )
       ) {
         console.error(`  ❌ [OUTLOOK BLOCKED] ${email} is locked/disabled by Microsoft: ${err.message}`);
         throw new Error(`OUTLOOK_ACCOUNT_LOCKED_OR_SUSPENDED: ${err.message}`);
       }
-      console.log(`  [WARN] Outlook poll warning: ${err.message}`);
+      console.log(`  [WARN] ${mode} poll warning: ${err.message}`);
     }
-    await sleep(4000);
+    await sleep(3000);
   }
   return null;
 }
@@ -266,10 +358,10 @@ async function extractSessionCookies(context, page) {
 }
 
 function saveAccountRecord(record) {
-  // Output CSV: created_at,email,password,cookies
+  // Output CSV: created_at,email,password,cookies,status
   const csvExists = fs.existsSync(CONFIG.outputCsv);
   if (!csvExists) {
-    const header = 'created_at,email,password,cookies\n';
+    const header = 'created_at,email,password,cookies,status\n';
     fs.writeFileSync(CONFIG.outputCsv, header, 'utf8');
   }
 
@@ -278,6 +370,7 @@ function saveAccountRecord(record) {
     csvCell(record.email),
     csvCell(record.password),
     csvCell(record.cookies),
+    csvCell('active'),
   ].join(',') + '\n';
 
   fs.appendFileSync(CONFIG.outputCsv, row, 'utf8');
@@ -297,27 +390,48 @@ function saveAccountRecord(record) {
 }
 
 async function runRegistration() {
+  const isOutlookMode = process.argv.includes('--outlook') ||
+    process.env.CHATGPT_MODE === 'outlook' ||
+    process.env.REGISTRATION_MODE === 'outlook';
+  const registrationMode = isOutlookMode ? 'outlook' : 'tempmail';
+
   console.log('\n=============================================');
-  console.log('       ChatGPT Auto-Registrar (Outlook)      ');
+  console.log(`       ChatGPT Auto-Registrar (${isOutlookMode ? 'Outlook' : 'TempMail'})      `);
   console.log('=============================================\n');
 
-  // 1. Pick Outlook Account
-  const outlookAccounts = loadOutlookAccounts();
-  if (outlookAccounts.length === 0) {
-    throw new Error('No Outlook accounts found in data/outlook_accounts.csv');
-  }
-
-  const chosenAccount = pickFreshOutlook(outlookAccounts, CONFIG.outputCsv, { requireToken: true });
-  if (!chosenAccount) {
-    throw new Error('No fresh Outlook accounts with valid refresh tokens available in data/outlook_accounts.csv');
-  }
-
-  const email = chosenAccount.email;
-  const password = chosenAccount.password || CONFIG.password;
-  const firstName = chosenAccount.firstName || randomFirstName();
-  const lastName = chosenAccount.lastName || randomLastName();
+  let email = '';
+  let password = CONFIG.password;
+  let firstName = randomFirstName();
+  let lastName = randomLastName();
   const birthday = getRandomBirthday();
+  let tempmail = null;
 
+  if (isOutlookMode) {
+    // 1. Pick Outlook Account
+    const outlookAccounts = loadOutlookAccounts();
+    if (outlookAccounts.length === 0) {
+      throw new Error('No Outlook accounts found in data/outlook_accounts.csv');
+    }
+
+    const chosenAccount = pickFreshOutlook(outlookAccounts, CONFIG.outputCsv, { requireToken: true });
+    if (!chosenAccount) {
+      throw new Error('No fresh Outlook accounts with valid refresh tokens available in data/outlook_accounts.csv');
+    }
+
+    email = chosenAccount.email;
+    password = chosenAccount.password || CONFIG.password;
+    firstName = chosenAccount.firstName || firstName;
+    lastName = chosenAccount.lastName || lastName;
+  } else {
+    // 1. TempMail Account
+    tempmail = new TempMail();
+    const userLocal = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${rand(10, 9999)}`;
+    const cliDomain = process.argv.find(a => a.startsWith('--domain='))?.split('=')[1] || process.env.CHATGPT_EMAIL_DOMAIN || null;
+    const inbox = await tempmail.createInbox(userLocal, cliDomain);
+    email = inbox.address;
+  }
+
+  console.log(`[*] Registration Mode: ${registrationMode}`);
   console.log(`[*] Selected Account: ${email}`);
   console.log(`[*] Target Name: ${firstName} ${lastName}`);
   console.log(`[*] Birthday: ${birthday.formatted}`);
@@ -528,6 +642,19 @@ async function checkIpBlockOrError(page) {
       await sleep(3000);
     }
 
+    // Check if domain is rejected by OpenAI ("The email you provided is not supported")
+    const unsupportedErr = page.locator([
+      'text="The email you provided is not supported"',
+      'text="email you provided is not supported"',
+      'text="The email is invalid"',
+      'text="Email is not valid"'
+    ].join(', ')).first();
+    if (await unsupportedErr.isVisible({ timeout: 1500 }).catch(() => false)) {
+      const errText = await unsupportedErr.innerText().catch(() => 'Email not supported');
+      console.error(`  ❌ [EMAIL REJECTED] OpenAI rejected email domain (${email}): ${errText}`);
+      throw new Error(`OPENAI_EMAIL_NOT_SUPPORTED: ${errText} (${email})`);
+    }
+
     await checkIpBlockOrError(page);
     await monitorTurnstile(page, 15000);
 
@@ -616,8 +743,14 @@ async function checkIpBlockOrError(page) {
           }
         }
 
-        console.log('[*] Polling Outlook inbox for OpenAI verification...');
-        const verificationData = await waitForOpenAiEmail(email, 120000, registrationStartTime - 30000);
+        console.log(`[*] Polling ${registrationMode} inbox for OpenAI verification...`);
+        const verificationData = await waitForOpenAiEmail(email, 120000, registrationStartTime - 30000, {
+          page,
+          resendAfterMs: 35000,
+          maxResends: 2,
+          mode: registrationMode,
+          tempmail,
+        });
 
         if (verificationData?.otp) {
           console.log(`[*] Filling OTP code: ${verificationData.otp}`);
@@ -664,7 +797,16 @@ async function checkIpBlockOrError(page) {
           await sleep(4000);
           continue;
         } else {
-          console.log('  [WARN] No OTP received yet, waiting on page...');
+          console.log('  [WARN] No OTP received yet, checking resend button on page...');
+          const resendBtn = page.locator('button:has-text("Resend email"), a:has-text("Resend email"), button:has-text("Resend code")').first();
+          if (await resendBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+            const isDisabled = await resendBtn.isDisabled().catch(() => false);
+            if (!isDisabled) {
+              console.log('  [🔄 RESEND] Clicking "Resend email" before retrying loop...');
+              await resendBtn.click().catch(() => {});
+              await sleep(3000);
+            }
+          }
         }
       }
 
