@@ -159,13 +159,19 @@ const BLOCKED_DOMAINS = [
   "telemetry.",
   "track.",
   "metrics.",
+  "connect.facebook.net",
+  "analytics.tiktok.com",
+  "useinsider.com",
+  "moengage.com",
+  "webengage.com",
+  "facebook.com/tr",
 ];
 
 /**
- * Intercept and abort heavy, unnecessary network requests (analytics, telemetry, ads, video/media)
+ * Intercept and abort heavy, unnecessary network requests (analytics, telemetry, ads, video/media, fonts, images)
  * to speed up browsing over slow proxies without breaking captchas or core app functionality.
  */
-async function setupNetworkOptimization(page) {
+async function setupNetworkOptimization(page, { blockImages = false, blockFonts = true } = {}) {
   if (!page || typeof page.route !== "function") return;
   try {
     await page.route("**/*", (route) => {
@@ -201,6 +207,19 @@ async function setupNetworkOptimization(page) {
 
       // Block heavy video/audio media
       if (resourceType === "media") {
+        return route.abort().catch(() => {});
+      }
+
+      // Block fonts for faster loading
+      if (blockFonts && resourceType === "font") {
+        return route.abort().catch(() => {});
+      }
+
+      // Block images if requested (keep captcha/qr allowed)
+      if (blockImages && resourceType === "image") {
+        if (url.includes("qr") || url.includes("captcha")) {
+          return route.continue().catch(() => {});
+        }
         return route.abort().catch(() => {});
       }
 
