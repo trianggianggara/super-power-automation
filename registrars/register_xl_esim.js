@@ -80,20 +80,33 @@ function generateIndonesianPhone() {
 const https = require("https");
 const { HttpsProxyAgent } = require("https-proxy-agent");
 
-const API_TIMEOUT_MS = Number(process.env.XL_API_TIMEOUT_SEC || 30) * 1000;
+const API_TIMEOUT_MS = Number(process.env.XL_API_TIMEOUT_SEC || 18) * 1000;
 
 function executeSingleRequest(url, options = {}, body = null, proxyUrl = "", timeoutMs = API_TIMEOUT_MS) {
   return new Promise((resolve, reject) => {
+    let timer = null;
+    let finished = false;
+
     const opts = { ...options };
     if (proxyUrl) {
       try {
         opts.agent = new HttpsProxyAgent(proxyUrl);
       } catch (_) {}
     }
+
+    const cleanup = () => {
+      finished = true;
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+    };
+
     const req = https.request(url, opts, (res) => {
       let data = "";
       res.on("data", (chunk) => (data += chunk));
       res.on("end", () => {
+        cleanup();
         try {
           resolve({ status: res.statusCode, data: JSON.parse(data), raw: data });
         } catch (_) {
@@ -101,10 +114,23 @@ function executeSingleRequest(url, options = {}, body = null, proxyUrl = "", tim
         }
       });
     });
-    req.on("error", reject);
-    req.setTimeout(timeoutMs, () => {
-      req.destroy(new Error(`ETIMEDOUT: API request timeout (${Math.round(timeoutMs / 1000)}s)`));
+
+    req.on("error", (err) => {
+      if (finished) return;
+      cleanup();
+      reject(err);
     });
+
+    // Hard JavaScript timer agar koneksi tidak pernah freeze/stuck saat proxy tunnel gantung
+    timer = setTimeout(() => {
+      if (finished) return;
+      cleanup();
+      try {
+        req.destroy();
+      } catch (_) {}
+      reject(new Error(`ETIMEDOUT: API request timeout (${Math.round(timeoutMs / 1000)}s)`));
+    }, timeoutMs);
+
     if (body) req.write(typeof body === "string" ? body : JSON.stringify(body));
     req.end();
   });
@@ -151,59 +177,32 @@ async function httpsApiRequest(url, options = {}, body = null, proxyUrl = "", ma
   throw lastError;
 }
 
+const jupiterUrl = "https://jupiter-mw-webxl.xlaxiata.my.id";
+
+async function getClientTokenDirect(proxyUrl = "") {
+  try {
+    const res = await httpsApiRequest(
+      "https://www.xl.co.id/api/auth/client-token",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      },
+      {},
+      proxyUrl,
+    );
+    return res.data?.token || null;
+  } catch (_) {
+    return null;
+  }
+}
+
 async function run() {
   ensureCsvHeader();
   console.log("=".repeat(60));
   console.log("  XL AXIATA FREE TRIAL eSIM REGISTRATION (DIRECT API)");
   console.log("=".repeat(60));
 
-  // 1. Resolve fresh email account (Gmail Dot-Trick or Outlook)
-  const isGmailMode =
-    process.argv.includes("--gmail") || process.env.EMAIL_MODE === "gmail";
-
-  let email = "";
-  let outlookAccount = null;
-
-  if (isGmailMode) {
-    console.log("\n[1/6] Mengambil alias Gmail Dot-Trick acak...");
-    const usedEmails = new Set();
-    if (fs.existsSync(CONFIG.outputFile)) {
-      try {
-        const lines = fs
-          .readFileSync(CONFIG.outputFile, "utf8")
-          .split("\n")
-          .filter(Boolean);
-        for (let i = 1; i < lines.length; i++) {
-          const parts = lines[i]
-            .split(",")
-            .map((p) => p.replace(/^"|"$/g, "").trim().toLowerCase());
-          if (parts[0]) usedEmails.add(parts[0]);
-        }
-      } catch {}
-    }
-    const fresh = gmail.pickFreshGmailAlias(usedEmails);
-    email = fresh.email;
-    console.log(
-      `  Akun Gmail terpilih (Dot-Trick): ${email} (Induk: ${fresh.baseEmail})`,
-    );
-  } else {
-    console.log("\n[1/6] Memilih akun Outlook dari data/outlook_accounts.csv...");
-    const res = await resolveEmail(null, {
-      mode: "outlook",
-      outputFile: CONFIG.outputFile,
-    });
-    email = res.email;
-    outlookAccount = res.outlookAccount;
-    console.log(`  Akun Outlook terpilih: ${email}`);
-  }
-
-  const fullName = `${randomFirstName()} ${randomLastName()}`;
-  const whatsappNumber = generateIndonesianPhone();
-  console.log(`  Nama Lengkap: ${fullName}`);
-  console.log(`  Nomor WhatsApp: ${whatsappNumber}`);
-
-  // 2. Select Proxy
-  console.log("\n[2/6] Membuka Stealth Token Provider & Session...");
+  // 1. Select Proxy
   const isDirect =
     process.argv.includes("--no-proxy") ||
     process.argv.includes("--direct") ||
@@ -232,6 +231,106 @@ async function run() {
   } else {
     console.log("  Koneksi Langsung (Tanpa Proxy)...");
   }
+
+  // Pre-fetch client token secara instan via API (< 300ms)
+  let preClientToken = await getClientTokenDirect(selectedProxy);
+
+  // 2. Resolve fresh email account (Gmail Dot-Trick or Outlook) & Fast Eligibility Pre-Check
+  const isGmailMode =
+    process.argv.includes("--gmail") || process.env.EMAIL_MODE === "gmail";
+
+  let email = "";
+  let outlookAccount = null;
+  let isEligibleVerified = false;
+
+  if (isGmailMode) {
+    console.log("\n[1/6] Mengambil alias Gmail Dot-Trick & verifikasi cepat...");
+    const usedEmails = new Set();
+    if (fs.existsSync(CONFIG.outputFile)) {
+      try {
+        const lines = fs
+          .readFileSync(CONFIG.outputFile, "utf8")
+          .split("\n")
+          .filter(Boolean);
+        for (let i = 1; i < lines.length; i++) {
+          const parts = lines[i]
+            .split(",")
+            .map((p) => p.replace(/^"|"$/g, "").trim().toLowerCase());
+          if (parts[0]) usedEmails.add(parts[0]);
+        }
+      } catch {}
+    }
+
+    let fresh = null;
+    for (let checkAttempt = 0; checkAttempt < 8; checkAttempt++) {
+      fresh = gmail.pickFreshGmailAlias(usedEmails);
+      email = fresh.email;
+      usedEmails.add(email.toLowerCase());
+
+      if (preClientToken) {
+        const eligCheck = await httpsApiRequest(
+          `${jupiterUrl}/esim/free-trial/check-eligibility`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${preClientToken}`,
+              Origin: "https://www.xl.co.id",
+              Referer: "https://www.xl.co.id/esim-trial/claim",
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            },
+          },
+          { email },
+          selectedProxy,
+        ).catch(() => null);
+
+        if (eligCheck?.data?.error || eligCheck?.data?.data?.code === "01") {
+          const errMsg =
+            eligCheck?.data?.data?.message ||
+            eligCheck?.data?.message ||
+            "Email has been used";
+          console.log(
+            `  ⚠️  [ALREADY USED] ${email} sudah pernah digunakan (${errMsg}). Menandai & mencari alias baru...`,
+          );
+          appendToCsv({
+            email,
+            phoneNumber: "-",
+            puk: "-",
+            activationCode: "-",
+            fullName: "-",
+            whatsapp: "-",
+            status: "ALREADY_USED",
+          });
+          continue;
+        }
+        isEligibleVerified = true;
+      }
+      break;
+    }
+
+    console.log(
+      `  Akun Gmail terpilih (Dot-Trick): ${email} (Induk: ${fresh?.baseEmail || "Gmail"})`,
+    );
+    if (isEligibleVerified) {
+      console.log(`  ✅ Verifikasi instan: Email memenuhi syarat (Eligible)!`);
+    }
+  } else {
+    console.log("\n[1/6] Memilih akun Outlook dari data/outlook_accounts.csv...");
+    const res = await resolveEmail(null, {
+      mode: "outlook",
+      outputFile: CONFIG.outputFile,
+    });
+    email = res.email;
+    outlookAccount = res.outlookAccount;
+    console.log(`  Akun Outlook terpilih: ${email}`);
+  }
+
+  const fullName = `${randomFirstName()} ${randomLastName()}`;
+  const whatsappNumber = generateIndonesianPhone();
+  console.log(`  Nama Lengkap: ${fullName}`);
+  console.log(`  Nomor WhatsApp: ${whatsappNumber}`);
+
+  console.log("\n[2/6] Membuka Stealth Token Provider & Session...");
 
   let browser = null;
   let context = null;
@@ -359,43 +458,42 @@ async function run() {
       });
     }
 
-    // 3. Request Client Token & Step 1 Captcha
-    console.log("\n[3/6] Meminta Client Token & Verifikasi reCAPTCHA...");
-    const clientToken = await getClientToken();
+    // 3. Request Client Token & Send OTP
+    console.log("\n[3/6] Meminta Client Token & Mempersiapkan sesi...");
+    const clientToken = preClientToken || (await getClientToken());
     if (!clientToken) {
       throw new Error("Gagal mengambil client token dari /api/auth/client-token");
     }
 
-    const formToken1 = await getFormToken(email);
-    console.log(`  Captcha formToken didapatkan: ${formToken1 ? "OK" : "None"}`);
-
-    // Check Eligibility & Send OTP via direct API in Node (with proxy support, immune to browser CORS)
-    console.log("  Memeriksa kelayakan email & mengirim OTP...");
-    const jupiterUrl = "https://jupiter-mw-webxl.xlaxiata.my.id";
-
-    const eligRes = await httpsApiRequest(
-      `${jupiterUrl}/esim/free-trial/check-eligibility`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${clientToken}`,
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-          Origin: "https://www.xl.co.id",
-          Referer: "https://www.xl.co.id/esim-trial/claim",
+    // Check Eligibility jika belum terverifikasi di step awal
+    if (!isEligibleVerified) {
+      console.log("  Memeriksa kelayakan email...");
+      const eligRes = await httpsApiRequest(
+        `${jupiterUrl}/esim/free-trial/check-eligibility`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${clientToken}`,
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            Origin: "https://www.xl.co.id",
+            Referer: "https://www.xl.co.id/esim-trial/claim",
+          },
         },
-      },
-      { email },
-      selectedProxy,
-    );
+        { email },
+        selectedProxy,
+      );
 
-    if (eligRes.data?.error || eligRes.data?.data?.code === "01") {
-      const errMsg =
-        eligRes.data?.data?.message ||
-        eligRes.data?.message ||
-        "Email sudah pernah digunakan untuk klaim Free Trial eSIM";
-      throw new Error(`Respon XL: ${errMsg}`);
+      if (eligRes.data?.error || eligRes.data?.data?.code === "01") {
+        const errMsg =
+          eligRes.data?.data?.message ||
+          eligRes.data?.message ||
+          "Email has been used";
+        throw new Error(`Respon XL: ${errMsg}`);
+      }
     }
+
+    console.log("  Mengirim OTP ke email...");
 
     const sendOtpRes = await httpsApiRequest(
       `${jupiterUrl}/esim/send-otp`,
@@ -668,7 +766,7 @@ async function run() {
   } catch (err) {
     console.error(`\n❌ Gagal registrasi XL eSIM: ${err.message}`);
     if (selectedProxy) {
-      handleProxyFailure(selectedProxy, err.message, { service: "xl", force: true });
+      handleProxyFailure(selectedProxy, err.message, { service: "xl", force: false });
     }
     if (page) {
       const errScreenshot = path.join(
@@ -677,12 +775,14 @@ async function run() {
       );
       await page.screenshot({ path: errScreenshot }).catch(() => {});
     }
-    if (
-      email &&
-      (err.message.includes("sudah pernah digunakan") ||
-        err.message.includes("tidak memenuhi syarat") ||
-        err.message.includes("Perangkat ini sudah"))
-    ) {
+    const isAlreadyUsedErr =
+      err.message.includes("sudah pernah digunakan") ||
+      err.message.includes("Email has been used") ||
+      err.message.toLowerCase().includes("has been used") ||
+      err.message.includes("tidak memenuhi syarat") ||
+      err.message.includes("Perangkat ini sudah");
+
+    if (email && isAlreadyUsedErr) {
       console.log(
         `  [AUTO-EXCLUDE] Menyimpan ${email} dengan status ALREADY_USED ke CSV agar tidak dipilih lagi.`,
       );
