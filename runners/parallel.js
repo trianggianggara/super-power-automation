@@ -42,7 +42,7 @@ const { loadProxyList, selectProxy, handleProxyFailure, isProxyError } = require
 const STATIC_PROXIES = [];
 
 const activeChildren = new Map();
-const serviceTarget = TARGET_SCRIPT.includes('github') ? 'github' : (TARGET_SCRIPT.includes('outlook') ? 'outlook' : (TARGET_SCRIPT.includes('chatgpt') ? 'chatgpt' : (TARGET_SCRIPT.includes('genspark') ? 'genspark' : (process.env.PROXY_TARGET_SERVICE || 'all'))));
+const serviceTarget = TARGET_SCRIPT.includes('github') ? 'github' : (TARGET_SCRIPT.includes('outlook') ? 'outlook' : (TARGET_SCRIPT.includes('chatgpt') ? 'chatgpt' : (TARGET_SCRIPT.includes('genspark') ? 'genspark' : (TARGET_SCRIPT.includes('xl') ? 'xl' : (process.env.PROXY_TARGET_SERVICE || 'all')))));
 
 function getThreadProxy(threadId) {
   if (STATIC_PROXIES.length > 0) {
@@ -87,7 +87,8 @@ function startThread(threadId) {
     lines.forEach(line => {
       if (line.trim()) {
         console.error(`${threadPrefix} ❌ [ERROR] ${line}`);
-        if (proxy && isProxyError(line)) {
+        const isDirect = process.argv.includes('--direct') || extraFlags.includes('--direct') || Boolean(process.env.DISABLE_PROXY);
+        if (proxy && !isDirect && isProxyError(line)) {
           handleProxyFailure(proxy, line, { service: serviceTarget });
         }
       }

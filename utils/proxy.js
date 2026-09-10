@@ -6,6 +6,7 @@ const OUTLOOK_FAILED_PROXIES_FILE = path.resolve(__dirname, '..', 'data', 'outlo
 const GITHUB_FAILED_PROXIES_FILE = path.resolve(__dirname, '..', 'data', 'github_failed_proxies.txt');
 const CHATGPT_FAILED_PROXIES_FILE = path.resolve(__dirname, '..', 'data', 'chatgpt_failed_proxies.txt');
 const GENSPARK_FAILED_PROXIES_FILE = path.resolve(__dirname, '..', 'data', 'genspark_failed_proxies.txt');
+const XL_FAILED_PROXIES_FILE = path.resolve(__dirname, '..', 'data', 'xl_failed_proxies.txt');
 
 function envFlag(name, defaultValue = false) {
   const value = process.env[name];
@@ -43,10 +44,12 @@ function loadFailedProxies(serviceOrFile = null) {
     filesToRead.push(CHATGPT_FAILED_PROXIES_FILE);
   } else if (serviceOrFile === 'genspark') {
     filesToRead.push(GENSPARK_FAILED_PROXIES_FILE);
+  } else if (serviceOrFile === 'xl' || serviceOrFile === 'esim') {
+    filesToRead.push(XL_FAILED_PROXIES_FILE);
   } else if (typeof serviceOrFile === 'string' && serviceOrFile.includes('/')) {
     filesToRead.push(serviceOrFile);
   } else {
-    filesToRead.push(OUTLOOK_FAILED_PROXIES_FILE, GITHUB_FAILED_PROXIES_FILE, CHATGPT_FAILED_PROXIES_FILE, GENSPARK_FAILED_PROXIES_FILE);
+    filesToRead.push(OUTLOOK_FAILED_PROXIES_FILE, GITHUB_FAILED_PROXIES_FILE, CHATGPT_FAILED_PROXIES_FILE, GENSPARK_FAILED_PROXIES_FILE, XL_FAILED_PROXIES_FILE);
   }
 
   for (const fp of filesToRead) {
@@ -82,6 +85,8 @@ function recordFailedProxy(proxyStrOrConfig, reason = 'DEAD', serviceOrFile = 'g
     filePath = CHATGPT_FAILED_PROXIES_FILE;
   } else if (serviceOrFile === 'genspark') {
     filePath = GENSPARK_FAILED_PROXIES_FILE;
+  } else if (serviceOrFile === 'xl' || serviceOrFile === 'esim') {
+    filePath = XL_FAILED_PROXIES_FILE;
   } else if (typeof serviceOrFile === 'string' && serviceOrFile.includes('/')) {
     filePath = serviceOrFile;
   }
@@ -307,7 +312,7 @@ function triggerBackgroundProxyFetch({ service = (process.env.PROXY_TARGET_SERVI
     const dir = path.dirname(LOCK_FILE);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
-    const flag = service === 'github' ? '--github' : (service === 'chatgpt' ? '--chatgpt' : (service === 'genspark' ? '--genspark' : (service === 'outlook' ? '--outlook' : '--all')));
+    const flag = service === 'github' ? '--github' : (service === 'chatgpt' ? '--chatgpt' : (service === 'genspark' ? '--genspark' : (service === 'xl' || service === 'esim' ? '--xl' : (service === 'outlook' ? '--outlook' : '--all'))));
 
     // Redirect logs to data/proxy_fetcher.log
     const outLog = fs.openSync(LOG_FILE, 'a');
@@ -341,7 +346,7 @@ function ensureProxiesAvailable({ filePath = PROXY_FILE_PATH, service = (process
       console.log(`\n[PROXY] http_proxies.txt is empty. Synchronously fetching fresh active proxies...\n`);
       try {
         const { execSync } = require('child_process');
-        const flag = service === 'github' ? '--github' : (service === 'chatgpt' ? '--chatgpt' : (service === 'genspark' ? '--genspark' : (service === 'outlook' ? '--outlook' : '--all')));
+        const flag = service === 'github' ? '--github' : (service === 'chatgpt' ? '--chatgpt' : (service === 'genspark' ? '--genspark' : (service === 'xl' || service === 'esim' ? '--xl' : (service === 'outlook' ? '--outlook' : '--all'))));
         execSync(`node tools/fetch_and_test_proxies.js ${flag}`, {
           stdio: 'inherit',
           cwd: path.resolve(__dirname, '..')
@@ -574,7 +579,10 @@ function selectProxy(fallbackProxyValue = process.env.PROXY || '', { filePath = 
       const lowestTier = sorted.filter(p => Number(gensparkUsage[extractHostPort(p)] || 0) === minUsage);
       chosen = lowestTier[Math.floor(Math.random() * lowestTier.length)];
     } else {
-      chosen = availableList[Math.floor(Math.random() * availableList.length)];
+      // Prioritaskan proxy tercepat (top tier dari http_proxies.txt yang sudah terurut berdasarkan latensi terendah)
+      const topCount = Math.min(5, availableList.length);
+      const topTier = availableList.slice(0, topCount);
+      chosen = topTier[Math.floor(Math.random() * topTier.length)];
     }
   } else if (activeList.length > 0) {
     // Jika semua proxy terpakai, fallback ke random dari activeList untuk menghindari crash
@@ -745,6 +753,8 @@ function markProxyDead(proxyStrOrConfig, reason = 'DEAD', filePath = PROXY_FILE_
     recordFailedProxy(proxyStrOrConfig, cleanReason, CHATGPT_FAILED_PROXIES_FILE);
   } else if (service === 'genspark') {
     recordFailedProxy(proxyStrOrConfig, cleanReason, GENSPARK_FAILED_PROXIES_FILE);
+  } else if (service === 'xl' || service === 'esim') {
+    recordFailedProxy(proxyStrOrConfig, cleanReason, XL_FAILED_PROXIES_FILE);
   } else {
     recordFailedProxy(proxyStrOrConfig, cleanReason, OUTLOOK_FAILED_PROXIES_FILE);
   }
