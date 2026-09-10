@@ -174,9 +174,10 @@ async function run() {
     process.env.PROXY ||
     "";
 
+  // Prioritaskan proxy jika tersedia. Jika kosong, auto-fetch background proxy against XL dan fallback ke direct.
   const selectedProxy = isDirect
     ? ""
-    : selectProxy(cliProxy, { service: "xl" });
+    : (cliProxy ? cliProxy : selectProxy("", { service: "xl", autoFetch: true }));
   const proxyConfig = selectedProxy ? proxyFromUrl(selectedProxy) : null;
 
   if (proxyConfig) {

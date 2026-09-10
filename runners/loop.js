@@ -16,7 +16,9 @@ const serviceTarget = targetScript.includes("github")
       ? "chatgpt"
       : targetScript.includes("genspark")
         ? "genspark"
-        : process.env.PROXY_TARGET_SERVICE || "all";
+        : targetScript.includes("xl")
+          ? "xl"
+          : process.env.PROXY_TARGET_SERVICE || "all";
 
 const PROXIES = [];
 
@@ -58,25 +60,20 @@ function getProxy() {
   ) {
     return null;
   }
-  // Khusus target XL eSIM, default selalu tanpa proxy (direct) kecuali ada argumen --proxy
-  if (
-    targetScript.includes("xl_esim") &&
-    !process.argv.some((a) => a.startsWith("--proxy"))
-  ) {
-    return null;
-  }
   if (PROXIES.length > 0) {
     return PROXIES[count % PROXIES.length];
   }
-  // Ambil secara dinamis dari http_proxies.txt di setiap iterasi agar jika proxy lama terhapus, loop otomatis memakai proxy baru yang aktif
-  const dynamicProxy = selectProxy("", {
-    autoFetch: false,
+  // Ambil secara dinamis dari http_proxies.txt di setiap iterasi.
+  // Jika proxy kosong/sedikit, background fetcher akan otomatis terpicu sesuai serviceTarget (misal: --xl).
+  const dynamicProxy = selectProxy(process.env.PROXY || "", {
+    autoFetch: true,
     service: serviceTarget,
   });
   if (dynamicProxy) {
     return dynamicProxy;
   }
-  return selectProxy(process.env.PROXY || "", { service: serviceTarget });
+  // Jika belum ada proxy yang siap/lolos uji, fallback ke null (direct) agar eksekusi tetap berjalan lancar.
+  return null;
 }
 
 function run() {
