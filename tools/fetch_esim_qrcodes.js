@@ -6,6 +6,7 @@ loadEnv();
 
 const outlook = require("../utils/outlook.js");
 const { loadOutlookAccounts } = require("../utils/email.js");
+const { loadGmailAccounts, fetchGmailEsimQrCode } = require("../utils/gmail.js");
 
 const OUTPUT_DIR = path.join(__dirname, "..", "data", "xl_esim");
 const CSV_FILE = path.join(OUTPUT_DIR, "xl_esim_accounts.csv");
@@ -48,13 +49,13 @@ async function run() {
     process.argv.includes("--scan") || process.argv.includes("--all");
 
   console.log("=".repeat(60));
-  console.log("  XL eSIM QR CODE & PUK FETCHER");
+  console.log("  XL eSIM QR CODE & PUK FETCHER (Outlook + Gmail)");
   console.log("=".repeat(60));
   console.log(`  Lokasi CSV: ${CSV_FILE}`);
   console.log(`  Folder QR : ${OUTPUT_DIR}`);
   if (isForce) console.log("  Mode: FORCE (mengunduh ulang semua QR code)");
   if (isScanAll)
-    console.log("  Mode: SCAN ALL (mencari QR di seluruh akun Outlook)");
+    console.log("  Mode: SCAN ALL (mencari QR di seluruh akun Outlook & Gmail)");
   console.log("=".repeat(60) + "\n");
 
   if (!fs.existsSync(OUTPUT_DIR)) {
@@ -90,7 +91,15 @@ async function run() {
 
   let targets = [];
   if (isScanAll) {
-    targets = allOutlookAccounts;
+    let allGmail = [];
+    try {
+      allGmail = loadGmailAccounts().map((g) => ({
+        email: g.email,
+        firstName: "Gmail",
+        lastName: "User",
+      }));
+    } catch (_) {}
+    targets = [...allOutlookAccounts, ...allGmail];
   } else {
     for (const [emailLower, row] of existingMap.entries()) {
       const acc = outlookMap.get(emailLower) || { email: row.email };
@@ -124,6 +133,41 @@ async function run() {
       !fs.existsSync(expectedQrPath);
 
     if (!needsCheck) {
+      continue;
+    }
+
+    if (emailLower.endsWith("@gmail.com") || emailLower.endsWith("@googlemail.com")) {
+      try {
+        const gmailRes = await fetchGmailEsimQrCode({
+          email,
+          outputDir: OUTPUT_DIR,
+          since: 0,
+        });
+        if (gmailRes && gmailRes.success) {
+          if (gmailRes.qrCodeFilename) downloadedCount++;
+          existingMap.set(emailLower, {
+            email,
+            phone_number: gmailRes.phoneNumber || existing?.phone_number || "",
+            puk: gmailRes.puk || existing?.puk || "",
+            activation_code: gmailRes.activationCode || existing?.activation_code || "",
+            full_name: existing?.full_name || "XL User",
+            whatsapp: existing?.whatsapp || "",
+            qr_code_file: gmailRes.qrCodeFilename || existing?.qr_code_file || "",
+            status: "SUCCESS",
+            created_at: existing?.created_at || new Date().toISOString(),
+          });
+          updatedCount++;
+          console.log(
+            `[${i + 1}/${targets.length}] 📥 Berhasil unduh QR (Gmail): ${gmailRes.qrCodeFilename} | No: ${gmailRes.phoneNumber} | PUK: ${gmailRes.puk} | Code: ${gmailRes.activationCode || "-"}`,
+          );
+        } else {
+          console.log(
+            `[${i + 1}/${targets.length}] ⏳ ${email}: Belum menerima email QR dari XL di Gmail`,
+          );
+        }
+      } catch (err) {
+        console.log(`[${i + 1}/${targets.length}] ⚠️ ${email}: ${err.message}`);
+      }
       continue;
     }
 
