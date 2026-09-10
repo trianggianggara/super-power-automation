@@ -1,0 +1,32 @@
+# Exclude git repository
+.git
+.github
+.gitignore
+
+# Exclude local environment and secret files
+.env
+.env.*
+*.env
+docker/outlook/.env
+
+# Exclude local dependencies (installed inside the container during build)
+node_modules/
+# package-lock.json (must be included for npm ci)
+
+# Exclude application data, reports, and logs
+data/
+screenshots/
+*.png
+*.jpg
+*.jpeg
+*.log
+*.csv
+*.txt
+!http_proxies.txt
+
+# Exclude IDE settings and temp files
+.vscode/
+.idea/
+.DS_Store
+tmp/
+temp/

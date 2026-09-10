@@ -1,0 +1,18 @@
+services:
+  reg-github:
+    build:
+      context: ../..
+      dockerfile: docker/github/Dockerfile
+    image: nbsbayu/reg-github:latest
+    container_name: reg-github
+    env_file:
+      - .env
+    cap_add:
+      - SYS_ADMIN
+    ipc: host
+    init: true
+    volumes:
+      - ./.data:/app/data
+      - ./.http_proxies.txt:/app/http_proxies.txt
+      - ./.screenshots:/app/screenshots
+      - /home/bayu/Project/autoregister-account/data/outlook_accounts.csv:/app/outlook_data/outlook_accounts.csv

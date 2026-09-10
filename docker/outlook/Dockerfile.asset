@@ -1,0 +1,15 @@
+# ==============================================================================
+# BASE IMAGE: ASSETS & NODE DEPENDENCIES
+# ==============================================================================
+# Starts from the prebuilt camoufox image.
+# This changes only when package.json dependencies are modified.
+FROM nbsbayu/reg-outlook:camoufox
+
+WORKDIR /app
+
+# Copy package manifests and patch script
+COPY package*.json ./
+COPY scripts/patch-playwright-camoufox.js ./scripts/
+
+# Install Node dependencies and execute the playwright hook patch
+RUN npm ci

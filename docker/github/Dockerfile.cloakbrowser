@@ -1,0 +1,27 @@
+# ==============================================================================
+# BASE IMAGE: CLOAKBROWSER SYSTEM DEPENDENCIES
+# ==============================================================================
+# Installs system libraries, Playwright noble, and GUI packages.
+FROM mcr.microsoft.com/playwright:v1.61.0-noble
+
+WORKDIR /app
+
+# Install system dependencies (Xvfb, dbus, fonts)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    xvfb \
+    dbus-x11 \
+    fonts-noto-color-emoji \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install CloakBrowser globally and download stealth Chromium binary
+RUN npm install -g cloakbrowser \
+    && cloakbrowser install
+
+# ------------------------------------------------------------------------------
+# Hardcoded Environment Variables
+# ------------------------------------------------------------------------------
+# Force headful execution (required for anti-detect features to work correctly)
+ENV HEADLESS=false
+
+# Point Playwright/Node directly to CloakBrowser binary
+ENV BROWSER_EXECUTABLE_PATH=cloakbrowser

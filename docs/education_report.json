@@ -1,0 +1,1837 @@
+{
+  "generatedAt": "2026-08-21T21:18:19.723Z",
+  "inputFile": "/home/bayu/Project/autoregister-account/docs/education.txt",
+  "totalLines": 134,
+  "uniqueCards": 129,
+  "validCount": 129,
+  "invalidCount": 4,
+  "duplicateCount": 4,
+  "brandDistribution": {
+    "VISA": 60,
+    "MASTERCARD": 40,
+    "DISCOVER": 25,
+    "AMEX": 4
+  },
+  "binAnalysis": [
+    {
+      "bin": "482812",
+      "count": 1,
+      "metadata": {
+        "bin": "482812",
+        "scheme": "VISA",
+        "type": "CREDIT",
+        "tier": "TRADITIONAL",
+        "issuer": "THE BANCORP BANK, NATIONAL ASSOCIATION",
+        "country": "United States",
+        "countryCode": "US"
+      }
+    },
+    {
+      "bin": "440393",
+      "count": 4,
+      "metadata": {
+        "bin": "440393",
+        "scheme": "VISA",
+        "type": "DEBIT",
+        "tier": "PREPAID CLASSIC",
+        "issuer": "SUTTON BANK",
+        "country": "United States",
+        "countryCode": "US"
+      }
+    },
+    {
+      "bin": "518941",
+      "count": 1,
+      "metadata": {
+        "bin": "518941",
+        "scheme": "MASTERCARD",
+        "type": "CREDIT",
+        "tier": "MASTERCARD WORLD ELITE",
+        "issuer": "Citibank N.A.",
+        "country": "United States",
+        "countryCode": "US"
+      }
+    },
+    {
+      "bin": "407943",
+      "count": 1,
+      "metadata": {
+        "bin": "407943",
+        "scheme": "VISA",
+        "type": "PREPAID",
+        "tier": "Visa Classic",
+        "issuer": "Pathward, N.A.",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      }
+    },
+    {
+      "bin": "601101",
+      "count": 15,
+      "metadata": {
+        "bin": "601101",
+        "scheme": "DISCOVER",
+        "type": "CREDIT",
+        "tier": "Consumer Credit - Core Plus",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      }
+    },
+    {
+      "bin": "411810",
+      "count": 1,
+      "metadata": {
+        "bin": "411810",
+        "scheme": "VISA",
+        "type": "PREPAID",
+        "tier": "Visa Classic",
+        "issuer": "Sutton Bank",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      }
+    },
+    {
+      "bin": "447227",
+      "count": 2,
+      "metadata": {
+        "bin": "447227",
+        "scheme": "VISA",
+        "type": "CREDIT",
+        "tier": "Visa Traditional",
+        "issuer": "Stride Bank, National Association",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      }
+    },
+    {
+      "bin": "420767",
+      "count": 2,
+      "metadata": {
+        "bin": "420767",
+        "scheme": "VISA",
+        "type": "DEBIT",
+        "tier": "Visa Classic",
+        "issuer": "Jpmorgan Chase Bank N.A. - Debit",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      }
+    },
+    {
+      "bin": "468839",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "542543",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "423223",
+      "count": 6,
+      "metadata": null
+    },
+    {
+      "bin": "559591",
+      "count": 8,
+      "metadata": null
+    },
+    {
+      "bin": "601100",
+      "count": 10,
+      "metadata": null
+    },
+    {
+      "bin": "498503",
+      "count": 2,
+      "metadata": null
+    },
+    {
+      "bin": "552486",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "403163",
+      "count": 15,
+      "metadata": null
+    },
+    {
+      "bin": "429371",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "485141",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "401543",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "536875",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "558158",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "403198",
+      "count": 2,
+      "metadata": null
+    },
+    {
+      "bin": "372512",
+      "count": 3,
+      "metadata": null
+    },
+    {
+      "bin": "515462",
+      "count": 12,
+      "metadata": null
+    },
+    {
+      "bin": "497203",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "431503",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "403995",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "448224",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "463342",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "475140",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "441712",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "486208",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "403690",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "414709",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "462845",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "515676",
+      "count": 3,
+      "metadata": null
+    },
+    {
+      "bin": "517608",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "527515",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "534456",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "514377",
+      "count": 2,
+      "metadata": null
+    },
+    {
+      "bin": "471876",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "414718",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "375516",
+      "count": 1,
+      "metadata": {
+        "bin": "375516",
+        "scheme": "AMERICAN EXPRESS",
+        "type": "CREDIT",
+        "tier": "PERSONAL",
+        "issuer": "ISRACARD",
+        "country": "Israel",
+        "countryCode": "IL"
+      }
+    },
+    {
+      "bin": "481582",
+      "count": 1,
+      "metadata": {
+        "bin": "481582",
+        "scheme": "VISA",
+        "type": "DEBIT",
+        "tier": "CLASSIC",
+        "issuer": "BANK OF AMERICA, NATIONAL ASSOCIATION",
+        "country": "United States",
+        "countryCode": "US"
+      }
+    },
+    {
+      "bin": "532839",
+      "count": 1,
+      "metadata": {
+        "bin": "532839",
+        "scheme": "MASTERCARD",
+        "type": "CREDIT",
+        "tier": "WORLD",
+        "issuer": "Capital One, National Association",
+        "country": "United States",
+        "countryCode": "US"
+      }
+    },
+    {
+      "bin": "544317",
+      "count": 1,
+      "metadata": {
+        "bin": "544317",
+        "scheme": "MASTERCARD",
+        "type": "CREDIT",
+        "tier": "MASTERCARD WORLD ELITE",
+        "issuer": "Capital One, National Association",
+        "country": "United States",
+        "countryCode": "US"
+      }
+    },
+    {
+      "bin": "469308",
+      "count": 1,
+      "metadata": {
+        "bin": "469308",
+        "scheme": "VISA",
+        "type": "DEBIT",
+        "tier": "PREPAID PLATINUM",
+        "issuer": "BIGPAY MALAYSIA SDN. BHD.",
+        "country": "Malaysia",
+        "countryCode": "MY"
+      }
+    },
+    {
+      "bin": "430496",
+      "count": 1,
+      "metadata": {
+        "bin": "430496",
+        "scheme": "VISA",
+        "type": "CREDIT",
+        "tier": "CLASSIC",
+        "issuer": "BANCO HIPOTECARIO, S.A.",
+        "country": "Argentina",
+        "countryCode": "AR"
+      }
+    },
+    {
+      "bin": "529097",
+      "count": 3,
+      "metadata": null
+    },
+    {
+      "bin": "402360",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "533317",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "425418",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "409451",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "414720",
+      "count": 1,
+      "metadata": null
+    },
+    {
+      "bin": "529580",
+      "count": 1,
+      "metadata": null
+    }
+  ],
+  "validCards": [
+    {
+      "pan": "4828120023320748",
+      "expiry": "12/28",
+      "cvv": "897",
+      "brand": "VISA",
+      "bin": "482812",
+      "binMetadata": {
+        "bin": "482812",
+        "scheme": "VISA",
+        "type": "CREDIT",
+        "tier": "TRADITIONAL",
+        "issuer": "THE BANCORP BANK, NATIONAL ASSOCIATION",
+        "country": "United States",
+        "countryCode": "US"
+      },
+      "extra": "7|too_many"
+    },
+    {
+      "pan": "4403931771043669",
+      "expiry": "02/30",
+      "cvv": "174",
+      "brand": "VISA",
+      "bin": "440393",
+      "binMetadata": {
+        "bin": "440393",
+        "scheme": "VISA",
+        "type": "DEBIT",
+        "tier": "PREPAID CLASSIC",
+        "issuer": "SUTTON BANK",
+        "country": "United States",
+        "countryCode": "US"
+      },
+      "extra": "1|active"
+    },
+    {
+      "pan": "5189410205614681",
+      "expiry": "03/30",
+      "cvv": "956",
+      "brand": "MASTERCARD",
+      "bin": "518941",
+      "binMetadata": {
+        "bin": "518941",
+        "scheme": "MASTERCARD",
+        "type": "CREDIT",
+        "tier": "MASTERCARD WORLD ELITE",
+        "issuer": "Citibank N.A.",
+        "country": "United States",
+        "countryCode": "US"
+      },
+      "extra": "0|active"
+    },
+    {
+      "pan": "4079430031811067",
+      "expiry": "10/32",
+      "cvv": "534",
+      "brand": "VISA",
+      "bin": "407943",
+      "binMetadata": {
+        "bin": "407943",
+        "scheme": "VISA",
+        "type": "PREPAID",
+        "tier": "Visa Classic",
+        "issuer": "Pathward, N.A.",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": "0|active"
+    },
+    {
+      "pan": "6011014196936814",
+      "expiry": "07/27",
+      "cvv": "192",
+      "brand": "DISCOVER",
+      "bin": "601101",
+      "binMetadata": {
+        "bin": "601101",
+        "scheme": "DISCOVER",
+        "type": "CREDIT",
+        "tier": "Consumer Credit - Core Plus",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": "0|active"
+    },
+    {
+      "pan": "4118103515226952",
+      "expiry": "04/32",
+      "cvv": "919",
+      "brand": "VISA",
+      "bin": "411810",
+      "binMetadata": {
+        "bin": "411810",
+        "scheme": "VISA",
+        "type": "PREPAID",
+        "tier": "Visa Classic",
+        "issuer": "Sutton Bank",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": "0|active"
+    },
+    {
+      "pan": "6011012040251117",
+      "expiry": "02/27",
+      "cvv": "585",
+      "brand": "DISCOVER",
+      "bin": "601101",
+      "binMetadata": {
+        "bin": "601101",
+        "scheme": "DISCOVER",
+        "type": "CREDIT",
+        "tier": "Consumer Credit - Core Plus",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": "0|active"
+    },
+    {
+      "pan": "4472270045714391",
+      "expiry": "02/29",
+      "cvv": "601",
+      "brand": "VISA",
+      "bin": "447227",
+      "binMetadata": {
+        "bin": "447227",
+        "scheme": "VISA",
+        "type": "CREDIT",
+        "tier": "Visa Traditional",
+        "issuer": "Stride Bank, National Association",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": "0|active"
+    },
+    {
+      "pan": "4207670339540125",
+      "expiry": "11/30",
+      "cvv": "522",
+      "brand": "VISA",
+      "bin": "420767",
+      "binMetadata": {
+        "bin": "420767",
+        "scheme": "VISA",
+        "type": "DEBIT",
+        "tier": "Visa Classic",
+        "issuer": "Jpmorgan Chase Bank N.A. - Debit",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": "0|active"
+    },
+    {
+      "pan": "4688390288777408",
+      "expiry": "08/30",
+      "cvv": "844",
+      "brand": "VISA",
+      "bin": "468839",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5425430124281846",
+      "expiry": "09/30",
+      "cvv": "259",
+      "brand": "MASTERCARD",
+      "bin": "542543",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "4232231104101467",
+      "expiry": "08/29",
+      "cvv": "424",
+      "brand": "VISA",
+      "bin": "423223",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5595910016222747",
+      "expiry": "12/28",
+      "cvv": "070",
+      "brand": "MASTERCARD",
+      "bin": "559591",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "6011006483347143",
+      "expiry": "02/30",
+      "cvv": "674",
+      "brand": "DISCOVER",
+      "bin": "601100",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "6011014351261321",
+      "expiry": "11/27",
+      "cvv": "551",
+      "brand": "DISCOVER",
+      "bin": "601101",
+      "binMetadata": {
+        "bin": "601101",
+        "scheme": "DISCOVER",
+        "type": "CREDIT",
+        "tier": "Consumer Credit - Core Plus",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": "0|active"
+    },
+    {
+      "pan": "4985031114641240",
+      "expiry": "08/28",
+      "cvv": "091",
+      "brand": "VISA",
+      "bin": "498503",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "4472270064102916",
+      "expiry": "04/29",
+      "cvv": "197",
+      "brand": "VISA",
+      "bin": "447227",
+      "binMetadata": {
+        "bin": "447227",
+        "scheme": "VISA",
+        "type": "CREDIT",
+        "tier": "Visa Traditional",
+        "issuer": "Stride Bank, National Association",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": "0|active"
+    },
+    {
+      "pan": "5524860298119960",
+      "expiry": "04/29",
+      "cvv": "294",
+      "brand": "MASTERCARD",
+      "bin": "552486",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "4031630207859090",
+      "expiry": "08/29",
+      "cvv": "362",
+      "brand": "VISA",
+      "bin": "403163",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "6011014670019756",
+      "expiry": "01/30",
+      "cvv": "907",
+      "brand": "DISCOVER",
+      "bin": "601101",
+      "binMetadata": {
+        "bin": "601101",
+        "scheme": "DISCOVER",
+        "type": "CREDIT",
+        "tier": "Consumer Credit - Core Plus",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": "0|active"
+    },
+    {
+      "pan": "4293713003934185",
+      "expiry": "11/26",
+      "cvv": "839",
+      "brand": "VISA",
+      "bin": "429371",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "6011005231019517",
+      "expiry": "03/27",
+      "cvv": "921",
+      "brand": "DISCOVER",
+      "bin": "601100",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "4851410069092636",
+      "expiry": "08/28",
+      "cvv": "404",
+      "brand": "VISA",
+      "bin": "485141",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "6011009247526069",
+      "expiry": "01/30",
+      "cvv": "280",
+      "brand": "DISCOVER",
+      "bin": "601100",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "4985031077286033",
+      "expiry": "09/28",
+      "cvv": "872",
+      "brand": "VISA",
+      "bin": "498503",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "4015432022950448",
+      "expiry": "02/28",
+      "cvv": "600",
+      "brand": "VISA",
+      "bin": "401543",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5368750001244198",
+      "expiry": "12/27",
+      "cvv": "644",
+      "brand": "MASTERCARD",
+      "bin": "536875",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5581585870329956",
+      "expiry": "06/29",
+      "cvv": "277",
+      "brand": "MASTERCARD",
+      "bin": "558158",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5595919094578136",
+      "expiry": "12/29",
+      "cvv": "993",
+      "brand": "MASTERCARD",
+      "bin": "559591",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5595913486802766",
+      "expiry": "12/31",
+      "cvv": "601",
+      "brand": "MASTERCARD",
+      "bin": "559591",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "4207678793253937",
+      "expiry": "11/32",
+      "cvv": "036",
+      "brand": "VISA",
+      "bin": "420767",
+      "binMetadata": {
+        "bin": "420767",
+        "scheme": "VISA",
+        "type": "DEBIT",
+        "tier": "Visa Classic",
+        "issuer": "Jpmorgan Chase Bank N.A. - Debit",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": "0|active"
+    },
+    {
+      "pan": "5595913413476130",
+      "expiry": "01/28",
+      "cvv": "872",
+      "brand": "MASTERCARD",
+      "bin": "559591",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5595914191250978",
+      "expiry": "04/31",
+      "cvv": "396",
+      "brand": "MASTERCARD",
+      "bin": "559591",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5595911124746288",
+      "expiry": "06/31",
+      "cvv": "466",
+      "brand": "MASTERCARD",
+      "bin": "559591",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "6011010187942191",
+      "expiry": "04/29",
+      "cvv": "339",
+      "brand": "DISCOVER",
+      "bin": "601101",
+      "binMetadata": {
+        "bin": "601101",
+        "scheme": "DISCOVER",
+        "type": "CREDIT",
+        "tier": "Consumer Credit - Core Plus",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": "0|active"
+    },
+    {
+      "pan": "4031989978968146",
+      "expiry": "05/29",
+      "cvv": "605",
+      "brand": "VISA",
+      "bin": "403198",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "4031989379981888",
+      "expiry": "04/28",
+      "cvv": "046",
+      "brand": "VISA",
+      "bin": "403198",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "372512618650448",
+      "expiry": "02/29",
+      "cvv": "0124",
+      "brand": "AMEX",
+      "bin": "372512",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "372512841228327",
+      "expiry": "09/30",
+      "cvv": "9510",
+      "brand": "AMEX",
+      "bin": "372512",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "372512842725453",
+      "expiry": "11/31",
+      "cvv": "8295",
+      "brand": "AMEX",
+      "bin": "372512",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5154620032361220",
+      "expiry": "02/30",
+      "cvv": "122",
+      "brand": "MASTERCARD",
+      "bin": "515462",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5154620945039137",
+      "expiry": "01/31",
+      "cvv": "703",
+      "brand": "MASTERCARD",
+      "bin": "515462",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5154620368453906",
+      "expiry": "03/28",
+      "cvv": "774",
+      "brand": "MASTERCARD",
+      "bin": "515462",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5595911465685152",
+      "expiry": "11/29",
+      "cvv": "485",
+      "brand": "MASTERCARD",
+      "bin": "559591",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5595915328503999",
+      "expiry": "03/31",
+      "cvv": "007",
+      "brand": "MASTERCARD",
+      "bin": "559591",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5154620222523738",
+      "expiry": "12/29",
+      "cvv": "094",
+      "brand": "MASTERCARD",
+      "bin": "515462",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5154620104450927",
+      "expiry": "07/30",
+      "cvv": "797",
+      "brand": "MASTERCARD",
+      "bin": "515462",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5154620959992791",
+      "expiry": "03/28",
+      "cvv": "750",
+      "brand": "MASTERCARD",
+      "bin": "515462",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5154620751864206",
+      "expiry": "03/31",
+      "cvv": "801",
+      "brand": "MASTERCARD",
+      "bin": "515462",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5154620949975567",
+      "expiry": "12/30",
+      "cvv": "696",
+      "brand": "MASTERCARD",
+      "bin": "515462",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5154620741361982",
+      "expiry": "02/31",
+      "cvv": "562",
+      "brand": "MASTERCARD",
+      "bin": "515462",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5154620201600796",
+      "expiry": "08/31",
+      "cvv": "380",
+      "brand": "MASTERCARD",
+      "bin": "515462",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5154620514229937",
+      "expiry": "06/29",
+      "cvv": "253",
+      "brand": "MASTERCARD",
+      "bin": "515462",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "5154620336125768",
+      "expiry": "06/29",
+      "cvv": "256",
+      "brand": "MASTERCARD",
+      "bin": "515462",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "4031630614614351",
+      "expiry": "10/29",
+      "cvv": "954",
+      "brand": "VISA",
+      "bin": "403163",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "4972039717739498",
+      "expiry": "05/29",
+      "cvv": "856",
+      "brand": "VISA",
+      "bin": "497203",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "4315037512595285",
+      "expiry": "06/28",
+      "cvv": "852",
+      "brand": "VISA",
+      "bin": "431503",
+      "binMetadata": null,
+      "extra": "0|active"
+    },
+    {
+      "pan": "4039952013733182",
+      "expiry": "09/28",
+      "cvv": "462",
+      "brand": "VISA",
+      "bin": "403995",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4232232141785056",
+      "expiry": "07/28",
+      "cvv": "881",
+      "brand": "VISA",
+      "bin": "423223",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4482240007449276",
+      "expiry": "08/26",
+      "cvv": "298",
+      "brand": "VISA",
+      "bin": "448224",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "6011008743503036",
+      "expiry": "11/26",
+      "cvv": "003",
+      "brand": "DISCOVER",
+      "bin": "601100",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4031631596123494",
+      "expiry": "04/31",
+      "cvv": "689",
+      "brand": "VISA",
+      "bin": "403163",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "6011005118766735",
+      "expiry": "06/29",
+      "cvv": "836",
+      "brand": "DISCOVER",
+      "bin": "601100",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4232233154489321",
+      "expiry": "01/29",
+      "cvv": "507",
+      "brand": "VISA",
+      "bin": "423223",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4031630108484659",
+      "expiry": "11/29",
+      "cvv": "715",
+      "brand": "VISA",
+      "bin": "403163",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4031631209907374",
+      "expiry": "12/28",
+      "cvv": "914",
+      "brand": "VISA",
+      "bin": "403163",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4031630123426107",
+      "expiry": "09/29",
+      "cvv": "454",
+      "brand": "VISA",
+      "bin": "403163",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4031630143588381",
+      "expiry": "05/29",
+      "cvv": "526",
+      "brand": "VISA",
+      "bin": "403163",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "6011010573559229",
+      "expiry": "11/26",
+      "cvv": "193",
+      "brand": "DISCOVER",
+      "bin": "601101",
+      "binMetadata": {
+        "bin": "601101",
+        "scheme": "DISCOVER",
+        "type": "CREDIT",
+        "tier": "Consumer Credit - Core Plus",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "4633425100611215",
+      "expiry": "09/26",
+      "cvv": "528",
+      "brand": "VISA",
+      "bin": "463342",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4232232182639808",
+      "expiry": "08/29",
+      "cvv": "518",
+      "brand": "VISA",
+      "bin": "423223",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4751400773715102",
+      "expiry": "04/30",
+      "cvv": "430",
+      "brand": "VISA",
+      "bin": "475140",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4417123018598101",
+      "expiry": "01/27",
+      "cvv": "331",
+      "brand": "VISA",
+      "bin": "441712",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4403935357845132",
+      "expiry": "03/28",
+      "cvv": "383",
+      "brand": "VISA",
+      "bin": "440393",
+      "binMetadata": {
+        "bin": "440393",
+        "scheme": "VISA",
+        "type": "DEBIT",
+        "tier": "PREPAID CLASSIC",
+        "issuer": "SUTTON BANK",
+        "country": "United States",
+        "countryCode": "US"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "4031630489680016",
+      "expiry": "09/30",
+      "cvv": "421",
+      "brand": "VISA",
+      "bin": "403163",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "6011001074303662",
+      "expiry": "01/30",
+      "cvv": "869",
+      "brand": "DISCOVER",
+      "bin": "601100",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4862080029849610",
+      "expiry": "11/29",
+      "cvv": "235",
+      "brand": "VISA",
+      "bin": "486208",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4031630622256989",
+      "expiry": "10/29",
+      "cvv": "259",
+      "brand": "VISA",
+      "bin": "403163",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4036902118718839",
+      "expiry": "02/27",
+      "cvv": "207",
+      "brand": "VISA",
+      "bin": "403690",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4403933789141741",
+      "expiry": "07/27",
+      "cvv": "890",
+      "brand": "VISA",
+      "bin": "440393",
+      "binMetadata": {
+        "bin": "440393",
+        "scheme": "VISA",
+        "type": "DEBIT",
+        "tier": "PREPAID CLASSIC",
+        "issuer": "SUTTON BANK",
+        "country": "United States",
+        "countryCode": "US"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "4031630799626279",
+      "expiry": "02/30",
+      "cvv": "635",
+      "brand": "VISA",
+      "bin": "403163",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4403935009068729",
+      "expiry": "09/28",
+      "cvv": "903",
+      "brand": "VISA",
+      "bin": "440393",
+      "binMetadata": {
+        "bin": "440393",
+        "scheme": "VISA",
+        "type": "DEBIT",
+        "tier": "PREPAID CLASSIC",
+        "issuer": "SUTTON BANK",
+        "country": "United States",
+        "countryCode": "US"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "6011014269280371",
+      "expiry": "12/27",
+      "cvv": "756",
+      "brand": "DISCOVER",
+      "bin": "601101",
+      "binMetadata": {
+        "bin": "601101",
+        "scheme": "DISCOVER",
+        "type": "CREDIT",
+        "tier": "Consumer Credit - Core Plus",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "4147098788195360",
+      "expiry": "05/30",
+      "cvv": "961",
+      "brand": "VISA",
+      "bin": "414709",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4628450079608809",
+      "expiry": "07/29",
+      "cvv": "508",
+      "brand": "VISA",
+      "bin": "462845",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "5156769319425212",
+      "expiry": "04/27",
+      "cvv": "423",
+      "brand": "MASTERCARD",
+      "bin": "515676",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4031630709645500",
+      "expiry": "04/29",
+      "cvv": "570",
+      "brand": "VISA",
+      "bin": "403163",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "6011014420767530",
+      "expiry": "03/30",
+      "cvv": "259",
+      "brand": "DISCOVER",
+      "bin": "601101",
+      "binMetadata": {
+        "bin": "601101",
+        "scheme": "DISCOVER",
+        "type": "CREDIT",
+        "tier": "Consumer Credit - Core Plus",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "5156769384998580",
+      "expiry": "05/30",
+      "cvv": "524",
+      "brand": "MASTERCARD",
+      "bin": "515676",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4232231155001145",
+      "expiry": "04/27",
+      "cvv": "453",
+      "brand": "VISA",
+      "bin": "423223",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "6011002434357604",
+      "expiry": "11/29",
+      "cvv": "147",
+      "brand": "DISCOVER",
+      "bin": "601100",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4031630368998125",
+      "expiry": "06/30",
+      "cvv": "428",
+      "brand": "VISA",
+      "bin": "403163",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4031630617130769",
+      "expiry": "12/28",
+      "cvv": "564",
+      "brand": "VISA",
+      "bin": "403163",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "5176085101967519",
+      "expiry": "01/30",
+      "cvv": "223",
+      "brand": "MASTERCARD",
+      "bin": "517608",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "5275150096949292",
+      "expiry": "09/28",
+      "cvv": "259",
+      "brand": "MASTERCARD",
+      "bin": "527515",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "5344560015934729",
+      "expiry": "07/29",
+      "cvv": "421",
+      "brand": "MASTERCARD",
+      "bin": "534456",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4232232177247237",
+      "expiry": "03/28",
+      "cvv": "561",
+      "brand": "VISA",
+      "bin": "423223",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4031630964264658",
+      "expiry": "09/30",
+      "cvv": "106",
+      "brand": "VISA",
+      "bin": "403163",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "5143773214797093",
+      "expiry": "02/29",
+      "cvv": "588",
+      "brand": "MASTERCARD",
+      "bin": "514377",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4718760312064128",
+      "expiry": "07/29",
+      "cvv": "946",
+      "brand": "VISA",
+      "bin": "471876",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "6011014196684869",
+      "expiry": "07/29",
+      "cvv": "913",
+      "brand": "DISCOVER",
+      "bin": "601101",
+      "binMetadata": {
+        "bin": "601101",
+        "scheme": "DISCOVER",
+        "type": "CREDIT",
+        "tier": "Consumer Credit - Core Plus",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "6011005752529159",
+      "expiry": "01/27",
+      "cvv": "815",
+      "brand": "DISCOVER",
+      "bin": "601100",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "6011005708825412",
+      "expiry": "09/26",
+      "cvv": "105",
+      "brand": "DISCOVER",
+      "bin": "601100",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "6011008273635737",
+      "expiry": "04/28",
+      "cvv": "994",
+      "brand": "DISCOVER",
+      "bin": "601100",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "6011011785602120",
+      "expiry": "01/30",
+      "cvv": "671",
+      "brand": "DISCOVER",
+      "bin": "601101",
+      "binMetadata": {
+        "bin": "601101",
+        "scheme": "DISCOVER",
+        "type": "CREDIT",
+        "tier": "Consumer Credit - Core Plus",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "6011014014436716",
+      "expiry": "11/27",
+      "cvv": "092",
+      "brand": "DISCOVER",
+      "bin": "601101",
+      "binMetadata": {
+        "bin": "601101",
+        "scheme": "DISCOVER",
+        "type": "CREDIT",
+        "tier": "Consumer Credit - Core Plus",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "4147181450526763",
+      "expiry": "11/27",
+      "cvv": "320",
+      "brand": "VISA",
+      "bin": "414718",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "375516293899896",
+      "expiry": "11/31",
+      "cvv": "3212",
+      "brand": "AMEX",
+      "bin": "375516",
+      "binMetadata": {
+        "bin": "375516",
+        "scheme": "AMERICAN EXPRESS",
+        "type": "CREDIT",
+        "tier": "PERSONAL",
+        "issuer": "ISRACARD",
+        "country": "Israel",
+        "countryCode": "IL"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "4031630596156637",
+      "expiry": "04/30",
+      "cvv": "087",
+      "brand": "VISA",
+      "bin": "403163",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4815820421475185",
+      "expiry": "03/31",
+      "cvv": "545",
+      "brand": "VISA",
+      "bin": "481582",
+      "binMetadata": {
+        "bin": "481582",
+        "scheme": "VISA",
+        "type": "DEBIT",
+        "tier": "CLASSIC",
+        "issuer": "BANK OF AMERICA, NATIONAL ASSOCIATION",
+        "country": "United States",
+        "countryCode": "US"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "6011013651739275",
+      "expiry": "01/29",
+      "cvv": "904",
+      "brand": "DISCOVER",
+      "bin": "601101",
+      "binMetadata": {
+        "bin": "601101",
+        "scheme": "DISCOVER",
+        "type": "CREDIT",
+        "tier": "Consumer Credit - Core Plus",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "6011012050424109",
+      "expiry": "03/27",
+      "cvv": "362",
+      "brand": "DISCOVER",
+      "bin": "601101",
+      "binMetadata": {
+        "bin": "601101",
+        "scheme": "DISCOVER",
+        "type": "CREDIT",
+        "tier": "Consumer Credit - Core Plus",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "5328398415370800",
+      "expiry": "01/28",
+      "cvv": "998",
+      "brand": "MASTERCARD",
+      "bin": "532839",
+      "binMetadata": {
+        "bin": "532839",
+        "scheme": "MASTERCARD",
+        "type": "CREDIT",
+        "tier": "WORLD",
+        "issuer": "Capital One, National Association",
+        "country": "United States",
+        "countryCode": "US"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "5443172275888221",
+      "expiry": "07/31",
+      "cvv": "647",
+      "brand": "MASTERCARD",
+      "bin": "544317",
+      "binMetadata": {
+        "bin": "544317",
+        "scheme": "MASTERCARD",
+        "type": "CREDIT",
+        "tier": "MASTERCARD WORLD ELITE",
+        "issuer": "Capital One, National Association",
+        "country": "United States",
+        "countryCode": "US"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "4693080246088914",
+      "expiry": "12/26",
+      "cvv": "845",
+      "brand": "VISA",
+      "bin": "469308",
+      "binMetadata": {
+        "bin": "469308",
+        "scheme": "VISA",
+        "type": "DEBIT",
+        "tier": "PREPAID PLATINUM",
+        "issuer": "BIGPAY MALAYSIA SDN. BHD.",
+        "country": "Malaysia",
+        "countryCode": "MY"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "4304960046647194",
+      "expiry": "11/30",
+      "cvv": "633",
+      "brand": "VISA",
+      "bin": "430496",
+      "binMetadata": {
+        "bin": "430496",
+        "scheme": "VISA",
+        "type": "CREDIT",
+        "tier": "CLASSIC",
+        "issuer": "BANCO HIPOTECARIO, S.A.",
+        "country": "Argentina",
+        "countryCode": "AR"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "5290970080979232",
+      "expiry": "09/30",
+      "cvv": "674",
+      "brand": "MASTERCARD",
+      "bin": "529097",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "5290970031192158",
+      "expiry": "01/30",
+      "cvv": "583",
+      "brand": "MASTERCARD",
+      "bin": "529097",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "5290970063319547",
+      "expiry": "01/31",
+      "cvv": "083",
+      "brand": "MASTERCARD",
+      "bin": "529097",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4023601007412117",
+      "expiry": "10/26",
+      "cvv": "500",
+      "brand": "VISA",
+      "bin": "402360",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "5333171151536527",
+      "expiry": "10/26",
+      "cvv": "632",
+      "brand": "MASTERCARD",
+      "bin": "533317",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "5143772971038972",
+      "expiry": "05/28",
+      "cvv": "299",
+      "brand": "MASTERCARD",
+      "bin": "514377",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4254180162911825",
+      "expiry": "02/30",
+      "cvv": "050",
+      "brand": "VISA",
+      "bin": "425418",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "6011011790687884",
+      "expiry": "10/30",
+      "cvv": "261",
+      "brand": "DISCOVER",
+      "bin": "601101",
+      "binMetadata": {
+        "bin": "601101",
+        "scheme": "DISCOVER",
+        "type": "CREDIT",
+        "tier": "Consumer Credit - Core Plus",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "6011013791651166",
+      "expiry": "08/28",
+      "cvv": "377",
+      "brand": "DISCOVER",
+      "bin": "601101",
+      "binMetadata": {
+        "bin": "601101",
+        "scheme": "DISCOVER",
+        "type": "CREDIT",
+        "tier": "Consumer Credit - Core Plus",
+        "country": "United States of America (the)",
+        "countryCode": "US"
+      },
+      "extra": ""
+    },
+    {
+      "pan": "4094511380816418",
+      "expiry": "05/30",
+      "cvv": "497",
+      "brand": "VISA",
+      "bin": "409451",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "4147202584187460",
+      "expiry": "04/30",
+      "cvv": "389",
+      "brand": "VISA",
+      "bin": "414720",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "5156769596601311",
+      "expiry": "01/31",
+      "cvv": "484",
+      "brand": "MASTERCARD",
+      "bin": "515676",
+      "binMetadata": null,
+      "extra": ""
+    },
+    {
+      "pan": "5295800275007363",
+      "expiry": "05/29",
+      "cvv": "722",
+      "brand": "MASTERCARD",
+      "bin": "529580",
+      "binMetadata": null,
+      "extra": ""
+    }
+  ],
+  "invalidCards": [
+    {
+      "lineNo": 91,
+      "raw": "4232231155001145|04|27|453",
+      "reason": "Duplikat (nomor kartu dan expiry sudah ada)"
+    },
+    {
+      "lineNo": 93,
+      "raw": "4232233154489321|01|29|507",
+      "reason": "Duplikat (nomor kartu dan expiry sudah ada)"
+    },
+    {
+      "lineNo": 115,
+      "raw": "6011013651739275|01|29|904",
+      "reason": "Duplikat (nomor kartu dan expiry sudah ada)"
+    },
+    {
+      "lineNo": 119,
+      "raw": "4693080246088914|12|26|845",
+      "reason": "Duplikat (nomor kartu dan expiry sudah ada)"
+    }
+  ]
+}

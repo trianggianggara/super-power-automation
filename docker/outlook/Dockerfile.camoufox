@@ -1,0 +1,33 @@
+# ==============================================================================
+# BASE IMAGE: CAMOUFOX SYSTEM DEPENDENCIES
+# ==============================================================================
+# Installs system libraries, Playwright noble, and GUI packages.
+# To avoid GitHub API rate limits, the browser binary itself is mounted at runtime.
+FROM mcr.microsoft.com/playwright:v1.61.0-noble
+
+WORKDIR /app
+
+# Install system dependencies (Xvfb, dbus, fonts, and python pip for downloading browser)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    xvfb \
+    dbus-x11 \
+    fonts-noto-color-emoji \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Bypass PEP 668 system protection globally inside the container
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+
+# Install camoufox python package temporarily to download the custom browser binary
+RUN pip3 install camoufox \
+    && python3 -m camoufox fetch \
+    && pip3 uninstall -y camoufox
+
+# ------------------------------------------------------------------------------
+# Hardcoded Environment Variables
+# ------------------------------------------------------------------------------
+# Force headful execution (required for anti-detect features to work correctly)
+ENV HEADLESS=false
+
+# Point Playwright/Node directly to the mounted Camoufox browser binary
+ENV BROWSER_EXECUTABLE_PATH=/root/.cache/camoufox/camoufox

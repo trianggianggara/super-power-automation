@@ -1,0 +1,16 @@
+# ==============================================================================
+# BASE IMAGE: ASSETS & NODE DEPENDENCIES
+# ==============================================================================
+# Starts from the prebuilt cloakbrowser image.
+# This changes only when package.json dependencies are modified.
+ARG BASE_IMAGE=nbsbayu/reg-github:cloakbrowser
+FROM ${BASE_IMAGE}
+
+WORKDIR /app
+
+# Copy package manifests and patch script
+COPY package*.json ./
+COPY scripts/patch-playwright-camoufox.js ./scripts/
+
+# Install Node dependencies and execute the playwright hook patch
+RUN npm ci

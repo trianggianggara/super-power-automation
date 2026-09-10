@@ -1,0 +1,9 @@
+.git
+node_modules
+*.png
+*.mp3
+*.csv
+*.html
+scratch
+__pycache__
+.venv-camoufox

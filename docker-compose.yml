@@ -1,0 +1,16 @@
+services:
+  mailpit:
+    image: axllent/mailpit:v1.30.0
+    ports:
+      - "127.0.0.1:8025:8025"
+    environment:
+      MP_DATABASE: /data/mailpit.db
+      MP_UI_AUTH: "${MAILPIT_USERNAME}:${MAILPIT_PASSWORD}"
+      MP_SEND_API_AUTH: "${MAILPIT_SEND_USERNAME}:${MAILPIT_SEND_PASSWORD}"
+      MP_MAX_MESSAGES: 10000
+    volumes:
+      - mailpit-data:/data
+    restart: unless-stopped
+
+volumes:
+  mailpit-data:

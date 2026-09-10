@@ -1,0 +1,36 @@
+services:
+  reg-outlook:
+    build:
+      context: ../..
+      dockerfile: docker/outlook/Dockerfile
+    image: nbsbayu/reg-outlook:latest
+    container_name: reg-outlook
+    env_file:
+      - .env
+    cap_add:
+      - SYS_ADMIN
+    ipc: host
+    init: true
+    volumes:
+      - ./.data:/app/data
+      - ./http_proxies.txt:/app/http_proxies.txt
+      - ./.screenshots:/app/screenshots
+
+  reg-outlook-graph:
+    build:
+      context: ../..
+      dockerfile: docker/outlook/Dockerfile
+    image: nbsbayu/reg-outlook:latest
+    container_name: reg-outlook-graph
+    env_file:
+      - .env
+    cap_add:
+      - SYS_ADMIN
+    ipc: host
+    init: true
+    volumes:
+      - ./.data:/app/data
+      - ./http_proxies.txt:/app/http_proxies.txt
+      - ./.screenshots:/app/screenshots
+    command: ["xvfb-run", "--server-args=-screen 0 1024x768x16 -nolisten tcp -extension GLX", "node", "runners/loop.js", "registrars/register_outlook_graph.js"]
+
