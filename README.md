@@ -155,7 +155,7 @@ TWO_CAPTCHA_KEY=
 # ==============================================================================
 # Integrasi Microsoft Graph / Outlook
 # ==============================================================================
-OUTLOOK_CLIENT_ID=a48e86c0-e508-4b09-9d69-f735792ed3e3
+OUTLOOK_CLIENT_ID=
 OUTLOOK_CLIENT_SECRET=
 OUTLOOK_ENABLE_RECOVERY_EMAIL=true
 
