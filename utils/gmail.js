@@ -387,6 +387,9 @@ async function fetchGmailEsimQrCode({
                 .replace(/-/g, "+")
                 .replace(/_/g, "/");
               qrCodeFilename = `qrcode_${cleanPhone || Date.now()}.png`;
+              if (!fs.existsSync(outputDir)) {
+                fs.mkdirSync(outputDir, { recursive: true });
+              }
               fs.writeFileSync(
                 path.join(outputDir, qrCodeFilename),
                 Buffer.from(base64, "base64"),

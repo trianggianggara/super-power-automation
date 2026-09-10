@@ -109,6 +109,7 @@ function httpsApiRequest(url, options = {}, body = null, proxyUrl = "") {
 }
 
 async function run() {
+  ensureCsvHeader();
   console.log("=".repeat(60));
   console.log("  XL AXIATA FREE TRIAL eSIM REGISTRATION (DIRECT API)");
   console.log("=".repeat(60));
@@ -579,6 +580,9 @@ async function run() {
             );
             if (att) {
               qrCodeFilename = `qrcode_${chosenMsisdn || Date.now()}.png`;
+              if (!fs.existsSync(CONFIG.outputDir)) {
+                fs.mkdirSync(CONFIG.outputDir, { recursive: true });
+              }
               fs.writeFileSync(
                 path.join(CONFIG.outputDir, qrCodeFilename),
                 Buffer.from(att.contentBytes, "base64"),
