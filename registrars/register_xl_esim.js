@@ -217,11 +217,45 @@ async function run() {
     "";
 
   // Prioritaskan proxy jika tersedia. Jika kosong, auto-fetch background proxy against XL dan fallback ke direct.
-  const selectedProxy = isDirect
+  let selectedProxy = isDirect
     ? ""
     : (cliProxy ? cliProxy : selectProxy("", { service: "xl", autoFetch: true }));
-  const proxyConfig = selectedProxy ? proxyFromUrl(selectedProxy) : null;
 
+  let preClientToken = null;
+  if (selectedProxy) {
+    try {
+      // Test proxy terlebih dahulu dengan timeout 8s agar tidak meloloskan proxy mati ke Chromium
+      const testRes = await executeSingleRequest(
+        "https://www.xl.co.id/api/auth/client-token",
+        { method: "POST", headers: { "Content-Type": "application/json" } },
+        {},
+        selectedProxy,
+        8000,
+      );
+      preClientToken = testRes.data?.token || null;
+    } catch (proxyErr) {
+      console.log(
+        `  ⚠️  Proxy ${selectedProxy} mati/lambat (${proxyErr.message}). Menghapus & beralih ke Direct...`,
+      );
+      handleProxyFailure(selectedProxy, proxyErr.message, { service: "xl", force: true });
+      selectedProxy = "";
+    }
+  }
+
+  if (!preClientToken) {
+    try {
+      const directRes = await executeSingleRequest(
+        "https://www.xl.co.id/api/auth/client-token",
+        { method: "POST", headers: { "Content-Type": "application/json" } },
+        {},
+        "",
+        8000,
+      );
+      preClientToken = directRes.data?.token || null;
+    } catch (_) {}
+  }
+
+  const proxyConfig = selectedProxy ? proxyFromUrl(selectedProxy) : null;
   if (proxyConfig) {
     const masked = String(selectedProxy).replace(
       /:\/\/([^:]+):([^@]+)@/,
@@ -231,9 +265,6 @@ async function run() {
   } else {
     console.log("  Koneksi Langsung (Tanpa Proxy)...");
   }
-
-  // Pre-fetch client token secara instan via API (< 300ms)
-  let preClientToken = await getClientTokenDirect(selectedProxy);
 
   // 2. Resolve fresh email account (Gmail Dot-Trick or Outlook) & Fast Eligibility Pre-Check
   const isGmailMode =
@@ -370,9 +401,8 @@ async function run() {
 
     // Navigasi ke claim page untuk inisialisasi session, cookies, dan origin
     console.log("  Menghubungkan session ke XL eSIM...");
-    await gotoWithRetry(page, CONFIG.claimUrl, { waitUntil: "commit", timeout: 30000 });
+    await gotoWithRetry(page, CONFIG.claimUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
     await page.waitForSelector("#claim-name, input, body", { timeout: 25000 }).catch(() => {});
-    await sleep(1500);
 
     // Pastikan reCAPTCHA script siap
     await page.evaluate(() => {
@@ -385,60 +415,144 @@ async function run() {
     }).catch(() => {});
 
     await page.waitForFunction(
-      () => typeof window.grecaptcha !== "undefined",
+      () => typeof window.grecaptcha !== "undefined" && typeof window.grecaptcha.execute === "function",
       { timeout: 15000 },
     ).catch(() => {});
 
-    // Helper reCAPTCHA token generator (dengan auto-retry jika koneksi proxy sempat drop)
+    let clientIp = "";
+
+    // Helper reCAPTCHA token generator (dengan in-page execution, public IP, dan fallback direct API validation)
     async function getFormToken(emailTarget, retries = 3) {
       for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-          const result = await page.evaluate(async (targetEmail) => {
-            const key = "6LeSD6EtAAAAAEhlHq07pv8_6JawCKeXcSxHMrRA";
-            if (!window.grecaptcha) return { error: "grecaptcha_not_loaded" };
+          console.log(`  [reCAPTCHA] Mengambil token reCAPTCHA (percobaan ${attempt}/${retries})...`);
 
-            const rcToken = await new Promise((resolve) => {
-              window.grecaptcha.ready(async () => {
+          const rcResult = await Promise.race([
+            page.evaluate(async (email) => {
+              const key = "6LeSD6EtAAAAAEhlHq07pv8_6JawCKeXcSxHMrRA";
+              if (!window.grecaptcha || typeof window.grecaptcha.execute !== "function") {
+                if (!document.querySelector(`script[src*="${key}"]`)) {
+                  const s = document.createElement("script");
+                  s.src = `https://www.google.com/recaptcha/api.js?render=${key}`;
+                  document.head.appendChild(s);
+                }
+                const ready = await new Promise((resolve) => {
+                  let checks = 0;
+                  const intId = setInterval(() => {
+                    checks++;
+                    if (window.grecaptcha && typeof window.grecaptcha.execute === "function") {
+                      clearInterval(intId);
+                      resolve(true);
+                    } else if (checks > 40) {
+                      clearInterval(intId);
+                      resolve(false);
+                    }
+                  }, 200);
+                });
+                if (!ready) return { error: "grecaptcha_not_loaded" };
+              }
+
+              return new Promise((resolve) => {
+                const timeoutId = setTimeout(() => resolve({ error: "recaptcha_timeout" }), 10000);
                 try {
-                  const t = await window.grecaptcha.execute(key, {
-                    action: "esim_trial_claim",
+                  window.grecaptcha.ready(async () => {
+                    try {
+                      // Ambil public IP seperti halnya di frontend XL (api.ipify.org)
+                      let ip = "";
+                      try {
+                        const ipRes = await fetch("https://api.ipify.org/?format=json");
+                        const ipJson = await ipRes.json();
+                        ip = ipJson?.ip || "";
+                      } catch (e) {}
+
+                      const token = await window.grecaptcha.execute(key, {
+                        action: "esim_trial_claim",
+                      });
+
+                      if (!token) {
+                        clearTimeout(timeoutId);
+                        return resolve({ error: "token_empty", ip });
+                      }
+
+                      // Langsung validasi token ke Next.js internal API di dalam page context
+                      const postRes = await fetch("/api/esim-trial/captcha", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          token,
+                          email,
+                          ip,
+                        }),
+                      });
+
+                      const resJson = await postRes.json().catch(() => ({}));
+                      clearTimeout(timeoutId);
+                      const formToken =
+                        resJson?.data?.formToken || resJson?.formToken || null;
+                      if (formToken) {
+                        return resolve({ formToken, ip, token });
+                      }
+                      return resolve({
+                        error: resJson?.errors || "captcha_rejected",
+                        ip,
+                        token,
+                      });
+                    } catch (e) {
+                      clearTimeout(timeoutId);
+                      resolve({ error: e.message || "execute_failed" });
+                    }
                   });
-                  resolve(t);
                 } catch (e) {
-                  resolve("");
+                  clearTimeout(timeoutId);
+                  resolve({ error: e.message || "ready_failed" });
                 }
               });
-            });
+            }, emailTarget),
+            sleep(16000).then(() => ({ error: "evaluate_timeout" })),
+          ]);
 
-            if (!rcToken) return { error: "empty_recaptcha_token" };
-
-            const res = await fetch("/api/esim-trial/captcha", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                token: rcToken,
-                email: targetEmail,
-                ip: "",
-              }),
-            });
-            const json = await res.json().catch(() => ({}));
-            return {
-              formToken: json?.data?.formToken || null,
-              success: json?.data?.success || false,
-            };
-          }, emailTarget);
-
-          if (result?.formToken) {
-            return result.formToken;
+          if (rcResult?.ip) {
+            clientIp = rcResult.ip;
           }
+
+          if (rcResult?.formToken) {
+            console.log(`  [reCAPTCHA] FormToken berhasil didapatkan!`);
+            return rcResult.formToken;
+          }
+
+          // Fallback ke Node API jika in-page fetch gagal tapi token reCAPTCHA berhasil di-generate
+          if (rcResult?.token) {
+            console.log(`  [reCAPTCHA] Mencoba verifikasi token via Node API fallback...`);
+            const captchaRes = await httpsApiRequest(
+              "https://www.xl.co.id/api/esim-trial/captcha",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+              },
+              {
+                token: rcResult.token,
+                email: emailTarget,
+                ip: rcResult.ip || clientIp || "",
+              },
+              selectedProxy,
+            );
+
+            const formToken =
+              captchaRes.data?.data?.formToken || captchaRes.data?.formToken || null;
+            if (formToken) {
+              console.log(`  [reCAPTCHA] FormToken berhasil didapatkan via Node fallback!`);
+              return formToken;
+            }
+          }
+
+          console.log(`  ⚠️  [reCAPTCHA] Percobaan ${attempt} gagal (${rcResult?.error || "token_empty"})...`);
           if (attempt < retries) {
-            console.log(`  [reCAPTCHA] Retry token provider (${attempt}/${retries})...`);
             await sleep(1500);
           }
         } catch (err) {
+          console.log(`  ⚠️  [reCAPTCHA] Error percobaan ${attempt}: ${err.message}`);
           if (attempt < retries) {
-            console.log(`  [reCAPTCHA] Connection dropped (${err.message}), retry ${attempt}/${retries}...`);
-            await sleep(2000);
+            await sleep(1500);
           }
         }
       }
@@ -602,12 +716,6 @@ async function run() {
       throw new Error("Tidak ada nomor eSIM yang tersedia saat ini dari XL");
     }
 
-    // Pilih nomor acak dari nomor yang tersedia
-    const chosenRaw =
-      availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
-    const chosenMsisdn = String(chosenRaw);
-    console.log(`  Nomor eSIM yang dipilih: ${chosenMsisdn}`);
-
     // 6. Final Claim eSIM via Direct API
     console.log("\n[6/6] Melakukan klaim akhir eSIM...");
     const formTokenFinal = await getFormToken(email);
@@ -616,48 +724,91 @@ async function run() {
     }
     console.log(`  Captcha formToken Final: ${formTokenFinal.slice(0, 16)}...`);
 
-    const txId =
-      "WEBESIMFT" +
-      Date.now().toString(36) +
-      Math.random().toString(36).slice(2, 6).toUpperCase();
-    const idempotencyKey = crypto.randomUUID();
+    let claimSuccess = false;
+    let chosenMsisdn = "";
+    const remainingNumbers = [...availableNumbers];
 
-    const claimHeaders = {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${clientToken}`,
-      "X-Free-Trial-Session": formTokenFinal,
-      "Idempotency-Key": idempotencyKey,
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      Origin: "https://www.xl.co.id",
-      Referer: "https://www.xl.co.id/esim-trial/claim",
-    };
+    while (remainingNumbers.length > 0 && !claimSuccess) {
+      const chosenIdx = Math.floor(Math.random() * remainingNumbers.length);
+      chosenMsisdn = String(remainingNumbers.splice(chosenIdx, 1)[0]);
+      console.log(`  Mencoba klaim dengan nomor eSIM: ${chosenMsisdn}`);
 
-    const claimRes = await httpsApiRequest(
-      `${jupiterUrl}/esim/free-trial/claim`,
-      {
-        method: "POST",
-        headers: claimHeaders,
-      },
-      {
-        transactionId: txId,
-        imei: "",
-        referralCode: "",
-        msisdn: chosenMsisdn,
-        contact: {
-          email,
-          fullName,
-          phoneNumber: whatsappNumber,
+      const txId =
+        "WEBESIMFT" +
+        Date.now().toString(36) +
+        Math.random().toString(36).slice(2, 6).toUpperCase();
+      const idempotencyKey = crypto.randomUUID();
+
+      const claimHeaders = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${clientToken}`,
+        "X-Free-Trial-Session": formTokenFinal,
+        "Idempotency-Key": idempotencyKey,
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        Origin: "https://www.xl.co.id",
+        Referer: "https://www.xl.co.id/esim-trial/claim",
+      };
+      if (clientIp) {
+        claimHeaders["X-Forwarded-For"] = clientIp;
+      }
+
+      const claimRes = await httpsApiRequest(
+        `${jupiterUrl}/esim/free-trial/claim`,
+        {
+          method: "POST",
+          headers: claimHeaders,
         },
-      },
-      selectedProxy,
-    );
+        {
+          transactionId: txId,
+          imei: "",
+          referralCode: "",
+          msisdn: chosenMsisdn,
+          contact: {
+            email,
+            fullName,
+            phoneNumber: whatsappNumber,
+          },
+        },
+        selectedProxy,
+      );
 
-    if (claimRes.status >= 400 || claimRes.data?.errors) {
+      const code = claimRes.data?.code || claimRes.data?.data?.code || "";
+      const isOk =
+        claimRes.status < 400 &&
+        !claimRes.data?.errors &&
+        (code === "00" ||
+          code === "" ||
+          claimRes.data?.status === "ok" ||
+          !claimRes.data?.error);
+
+      if (isOk) {
+        claimSuccess = true;
+        console.log(`  🎉 Status Klaim: Berhasil (200 OK) untuk nomor ${chosenMsisdn}`);
+        break;
+      }
+
       const errDetail =
         claimRes.data?.errors ||
+        claimRes.data?.data?.message ||
         claimRes.data?.message ||
         "Gagal melakukan klaim eSIM";
+      console.log(`  ⚠️  Klaim nomor ${chosenMsisdn} gagal: ${errDetail} (code: ${code})`);
+
+      // Jika nomor sudah diambil pengguna lain, coba nomor lain yang tersisa
+      const isTaken =
+        /nomor|msisdn|taken|sudah diambil/i.test(String(errDetail)) ||
+        ["02", "11", "12", "14", "15", "16", "19"].includes(code);
+      if (isTaken && remainingNumbers.length > 0) {
+        console.log(`  Nomor ${chosenMsisdn} sudah terpakai, mencoba nomor lain yang tersedia...`);
+        await sleep(1000);
+        continue;
+      }
+
       throw new Error(`Respon XL Klaim: ${errDetail}`);
+    }
+
+    if (!claimSuccess) {
+      throw new Error("Gagal melakukan klaim untuk semua nomor eSIM yang dicoba");
     }
 
     console.log(`  🎉 Status Klaim: Berhasil (200 OK)`);
