@@ -53,7 +53,7 @@ function ensureCsvHeader() {
   if (!fs.existsSync(CONFIG.outputFile)) {
     fs.writeFileSync(
       CONFIG.outputFile,
-      '"email","phone_number","puk","full_name","whatsapp","qr_code_file","status","created_at"\n',
+      '"email","phone_number","puk","activation_code","full_name","whatsapp","qr_code_file","status","created_at"\n',
       "utf8",
     );
   }
@@ -63,6 +63,7 @@ function appendToCsv({
   email,
   phoneNumber,
   puk = "",
+  activationCode = "",
   fullName,
   whatsapp,
   qrCodeFile = "",
@@ -70,7 +71,7 @@ function appendToCsv({
 }) {
   ensureCsvHeader();
   const createdAt = new Date().toISOString();
-  const line = `"${email}","${phoneNumber}","${puk}","${fullName}","${whatsapp}","${qrCodeFile}","${status}","${createdAt}"\n`;
+  const line = `"${email}","${phoneNumber}","${puk}","${activationCode}","${fullName}","${whatsapp}","${qrCodeFile}","${status}","${createdAt}"\n`;
   fs.appendFileSync(CONFIG.outputFile, line, "utf8");
 }
 
@@ -477,12 +478,13 @@ async function run() {
       )
       .catch(() => {});
 
-    // Ambil Kode PUK dan file QR Code resmi dari email XL
+    // Ambil Kode PUK, Activation Code, dan file QR Code resmi dari email XL
     let pukCode = "";
+    let activationCode = "";
     let qrCodeFilename = "";
     try {
       console.log(
-        "  Mengecek email konfirmasi untuk mengambil QR code & PUK...",
+        "  Mengecek email konfirmasi untuk mengambil QR code, PUK & Activation Code...",
       );
       const outlook = require("../utils/outlook.js");
       const token = await outlook.getAccessToken(email);
@@ -523,6 +525,9 @@ async function run() {
           const pukMatch = cleanBody.match(/Kode PUK\s*:\s*(\d+)/i);
           if (pukMatch) pukCode = pukMatch[1];
 
+          const actMatch = cleanBody.match(/Activation Code\s*(?:Activation Code)?\s*([A-Z0-9-]+)/i);
+          if (actMatch) activationCode = actMatch[1];
+
           const res = await fetch(
             `https://graph.microsoft.com/v1.0/me/messages/${qrMsg.id}/attachments`,
             {
@@ -540,7 +545,7 @@ async function run() {
               Buffer.from(att.contentBytes, "base64"),
             );
             console.log(
-              `  QR Code terverifikasi & tersimpan: ${qrCodeFilename} (PUK: ${pukCode || "ada di email"})`,
+              `  QR Code terverifikasi & tersimpan: ${qrCodeFilename} (PUK: ${pukCode || "ada di email"}, Code: ${activationCode || "ada di email"})`,
             );
           }
           break;
@@ -556,6 +561,7 @@ async function run() {
       email,
       phoneNumber: selectedNumber,
       puk: pukCode,
+      activationCode,
       fullName,
       whatsapp: whatsappNumber,
       qrCodeFile: qrCodeFilename,

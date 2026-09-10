@@ -72,11 +72,12 @@ async function run() {
         email: p[0],
         phone_number: p[1] || "",
         puk: p[2] || "",
-        full_name: p[3] || "",
-        whatsapp: p[4] || "",
-        qr_code_file: p[5] || "",
-        status: p[6] || "SUCCESS",
-        created_at: p[7] || new Date().toISOString(),
+        activation_code: p[3] || "",
+        full_name: p[4] || "",
+        whatsapp: p[5] || "",
+        qr_code_file: p[6] || "",
+        status: p[7] || "SUCCESS",
+        created_at: p[8] || new Date().toISOString(),
       });
     }
   }
@@ -147,9 +148,12 @@ async function run() {
         const phoneDigits =
           rawPhone.replace(/\D/g, "") || phoneFormatted.replace(/\D/g, "");
 
-        // Ekstrak Kode PUK
+        // Ekstrak Kode PUK & Activation Code
         const pukMatch = cleanBody.match(/Kode PUK\s*:\s*(\d+)/i);
         const puk = pukMatch ? pukMatch[1] : existing?.puk || "";
+
+        const actMatch = cleanBody.match(/Activation Code\s*(?:Activation Code)?\s*([A-Z0-9-]+)/i);
+        const activationCode = actMatch ? actMatch[1] : existing?.activation_code || "";
 
         // Unduh File Gambar QR Code
         let qrFilename =
@@ -189,6 +193,7 @@ async function run() {
           email,
           phone_number: phoneFormatted,
           puk,
+          activation_code: activationCode,
           full_name:
             existing?.full_name ||
             `${acc.firstName || ""} ${acc.lastName || ""}`.trim() ||
@@ -220,11 +225,11 @@ async function run() {
   rows.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
   const header =
-    '"email","phone_number","puk","full_name","whatsapp","qr_code_file","status","created_at"';
+    '"email","phone_number","puk","activation_code","full_name","whatsapp","qr_code_file","status","created_at"';
   const outLines = [header];
   for (const r of rows) {
     outLines.push(
-      `"${r.email}","${r.phone_number}","${r.puk}","${r.full_name}","${r.whatsapp}","${r.qr_code_file}","${r.status}","${r.created_at}"`,
+      `"${r.email}","${r.phone_number}","${r.puk}","${r.activation_code}","${r.full_name}","${r.whatsapp}","${r.qr_code_file}","${r.status}","${r.created_at}"`,
     );
   }
   fs.writeFileSync(CSV_FILE, outLines.join("\n") + "\n", "utf8");
