@@ -154,12 +154,7 @@ function run() {
     }
 
     let delay;
-    if (consecutiveErrors >= 3) {
-      delay = 3 * 60 * 1000; // 3 menit cooldown jika gagal 3x beruntun
-      console.log(
-        `\n⏳ [COOLDOWN] Terjadi ${consecutiveErrors}x gagal beruntun. Menunggu 3 menit agar sistem/IP kembali normal...`,
-      );
-    } else if (process.env.LOOP_DELAY_SEC) {
+    if (process.env.LOOP_DELAY_SEC) {
       delay = Number(process.env.LOOP_DELAY_SEC) * 1000;
     } else if (process.env.LOOP_DELAY) {
       delay = Number(process.env.LOOP_DELAY);

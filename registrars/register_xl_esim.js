@@ -80,7 +80,9 @@ function generateIndonesianPhone() {
 const https = require("https");
 const { HttpsProxyAgent } = require("https-proxy-agent");
 
-function httpsApiRequest(url, options = {}, body = null, proxyUrl = "") {
+const API_TIMEOUT_MS = Number(process.env.XL_API_TIMEOUT_SEC || 30) * 1000;
+
+function executeSingleRequest(url, options = {}, body = null, proxyUrl = "", timeoutMs = API_TIMEOUT_MS) {
   return new Promise((resolve, reject) => {
     const opts = { ...options };
     if (proxyUrl) {
@@ -100,12 +102,53 @@ function httpsApiRequest(url, options = {}, body = null, proxyUrl = "") {
       });
     });
     req.on("error", reject);
-    req.setTimeout(15000, () => {
-      req.destroy(new Error("ETIMEDOUT: API request timeout (15s)"));
+    req.setTimeout(timeoutMs, () => {
+      req.destroy(new Error(`ETIMEDOUT: API request timeout (${Math.round(timeoutMs / 1000)}s)`));
     });
     if (body) req.write(typeof body === "string" ? body : JSON.stringify(body));
     req.end();
   });
+}
+
+async function httpsApiRequest(url, options = {}, body = null, proxyUrl = "", maxRetries = 2) {
+  let lastError = null;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await executeSingleRequest(url, options, body, proxyUrl);
+    } catch (err) {
+      lastError = err;
+      const isNetworkErr =
+        err.message.includes("ETIMEDOUT") ||
+        err.message.includes("ECONNRESET") ||
+        err.message.includes("socket hang up") ||
+        err.message.includes("ENOTFOUND") ||
+        err.message.includes("EHOSTUNREACH") ||
+        err.message.includes("ECONNREFUSED");
+
+      if (isNetworkErr && attempt < maxRetries) {
+        console.log(
+          `  ⚠️  [API Request] Attempt ${attempt}/${maxRetries} terkendala (${err.message}). Mencoba ulang dalam 1.5s...`,
+        );
+        await sleep(1500);
+        continue;
+      }
+      break;
+    }
+  }
+
+  // Jika proxy gagal/timeout setelah retry, coba fallback direct sebagai penyelamat terakhir (terutama saat OTP sudah masuk)
+  if (proxyUrl && lastError) {
+    try {
+      console.log(
+        `  ⚠️  [API Request] Proxy terkendala (${lastError.message}). Mencoba fallback direct...`,
+      );
+      return await executeSingleRequest(url, options, body, "", 20000);
+    } catch (directErr) {
+      throw lastError;
+    }
+  }
+
+  throw lastError;
 }
 
 async function run() {
